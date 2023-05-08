@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
 import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
@@ -7,24 +6,27 @@ from database.async_sqlite import AsyncSQLite
 from mylogger import MyLogger
 
 
-class GetQianWenByWeb(object):
+async def init_db() -> None:
+    db_name = "ChouQian.db"
+    async_db = AsyncSQLite(db_name)
+    create_table_query = """
+    CREATE TABLE IF NOT EXISTS qian_zhuge (
+        id INTEGER PRIMARY KEY,
+        qianwen TEXT,
+        jieshi TEXT,
+        jieqian TEXT
+    )
+    """
+    await async_db.execute(create_table_query)
+
+
+class GetQianwenByWeb(object):
     def __init__(self) -> None:
         db_name = "ChouQian.db"
         self.url = 'https://www.ttlingqian.com/zhuge/'
         self.async_db = AsyncSQLite(db_name)
         self.my_logger = MyLogger(logger_name="chouqian")
         self.logger = self.my_logger.get_logger()
-
-    async def init_db(self):
-        create_table_query = """
-        CREATE TABLE IF NOT EXISTS qian_zhuge (
-            id INTEGER PRIMARY KEY,
-            qianwen TEXT,
-            jieshi TEXT,
-            jieqian TEXT
-        )
-        """
-        await self.async_db.execute(create_table_query)
 
     async def get_qianwen_by_web(self) -> None:
         # 创建一个最大并发数为5的信号量
@@ -56,9 +58,32 @@ class GetQianWenByWeb(object):
             await asyncio.gather(*tasks)
 
 
-async def get_qianwen_by_web_main():
-    my_instance = GetQianWenByWeb()
-    await my_instance.init_db()
+async def get_qianwen_by_local() -> None:
+    db_name = "ChouQian.db"
+    async_db = AsyncSQLite(db_name)
+
+    await init_db()
+
+    with open("qian_zhuge.sql", 'r', encoding='utf-8') as f:
+        sql_content = f.read()
+
+    # 将SQL文件内容分割成单独的语句
+    sql_statements = sql_content.split(';')
+
+    # 创建一个最大并发数为5的信号量
+    sem = asyncio.Semaphore(5)
+
+    async def execute_statement(statement):
+        async with sem:  # 将信号量放到函数内部
+            await async_db.execute(statement)
+
+    tasks = [execute_statement(statement) for statement in sql_statements]
+    await asyncio.gather(*tasks)
+
+
+async def get_qianwen_by_web_main() -> None:
+    my_instance = GetQianwenByWeb()
+    await init_db()
     await my_instance.get_qianwen_by_web()
 
 

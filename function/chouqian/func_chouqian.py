@@ -1,6 +1,6 @@
 import asyncio
 
-from get_qianwen_by_web import get_qianwen_by_web_main
+from get_qianwen import get_qianwen_by_web_main, get_qianwen_by_local
 
 
 def getQianwenByWeb() -> None:
@@ -12,5 +12,14 @@ def getQianwenByWeb() -> None:
     asyncio.run(get_qianwen_by_web_main())
 
 
+def getQiqnwenByLocal() -> None:
+    """
+    使用sql文件导入签文数据
+    :return:
+    """
+    asyncio.run(get_qianwen_by_local())
 
-# getQianwenByWeb()
+
+if __name__ == '__main__':
+    # getQianwenByWeb()
+    getQiqnwenByLocal()
