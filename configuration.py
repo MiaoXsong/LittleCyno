@@ -26,6 +26,5 @@ class Config(object):
 
     def reload(self) -> None:
         yconfig = self._load_config()
-        logging.config.dictConfig(yconfig["logging"])
         self.GROUPS = yconfig["groups"]["enable"]
         self.SHOWAPI = yconfig.get("showapi")

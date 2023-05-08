@@ -10,13 +10,13 @@ from wcferry import Wcf, WxMsg, wcf_pb2
 from configuration import Config
 from robot import Robot
 from datetime import datetime
+from mylogger import MyLogger
 
 class MyWcf(Wcf):
     """重写Wcf类，处理消息时多线程异步"""
-    def enable_recv_msg(self, callback: Callable[[WxMsg], None] = None) -> bool:
-        """（不建议使用）设置接收消息回调，消息量大时可能会丢失消息
 
-        .. deprecated:: 3.7.0.30.13
+    def enable_recv_msg(self, callback: Callable[[WxMsg], None] = None) -> bool:
+        """deprecated:: 3.7.0.30.13
         """
 
         def listening_msg():

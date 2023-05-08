@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -9,15 +8,17 @@ from wcferry import Wcf, WxMsg
 
 from configuration import Config
 from job_mgmt import Job
+from mylogger import MyLogger
 
 
 class Robot(Job):
     """个性化自己的机器人
     """
+
     def __init__(self, config: Config, wcf: Wcf) -> None:
         self.wcf = wcf
         self.config = config
-        self.LOG = logging.getLogger("Robot")
+        self.LOG = MyLogger(logger_name="robot").get_logger()
         self.wxid = self.wcf.get_self_wxid()
         self.allContacts = self.getAllContacts()
 

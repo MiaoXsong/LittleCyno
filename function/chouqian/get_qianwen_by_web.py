@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from bs4 import BeautifulSoup
-from database.async_sqlite import AsyncSQLite
+import logging
 import asyncio
 import aiohttp
+from bs4 import BeautifulSoup
+from database.async_sqlite import AsyncSQLite
+from mylogger import MyLogger
 
 
 class GetQianWenByWeb(object):
@@ -11,6 +12,8 @@ class GetQianWenByWeb(object):
         db_name = "ChouQian.db"
         self.url = 'https://www.ttlingqian.com/zhuge/'
         self.async_db = AsyncSQLite(db_name)
+        self.my_logger = MyLogger(logger_name="chouqian")
+        self.logger = self.my_logger.get_logger()
 
     async def init_db(self):
         create_table_query = """
@@ -24,16 +27,17 @@ class GetQianWenByWeb(object):
         await self.async_db.execute(create_table_query)
 
     async def get_qianwen_by_web(self) -> None:
-        sem = asyncio.Semaphore(10)
+        # 创建一个最大并发数为5的信号量
+        sem = asyncio.Semaphore(5)
 
-        async def fetch(url, i):
-            async with sem, aiohttp.ClientSession() as session:
+        async def fetch(session, url, i):
+            async with sem:
                 async with session.get(url) as response:
                     if response.status == 200:
                         html_content = await response.text()
                         soup = BeautifulSoup(html_content, "html.parser")
+                        self.logger.info(f"正在提取第 {i} 签")
 
-                        print(f"正在提取第 {i} 签")
                         result_dict = {'num': i}
                         for item in soup.find_all('div', class_='qianresult_item'):
                             title = item.find('div', class_='qianresult_name').text.strip()
@@ -45,10 +49,11 @@ class GetQianWenByWeb(object):
                                        "id, qianwen, jieshi, jieqian) VALUES (?, ?, ?, ?)"
                         await self.async_db.execute(insert_query, tuple(result_dict.values()))
                     else:
-                        print(f"请求失败，状态码：{response.status}")
+                        self.logger.error(f"请求失败，状态码：{response.status}")
 
-        tasks = [fetch(f"{self.url}{str(i)}.html", i) for i in range(1, 385)]
-        await asyncio.gather(*tasks)
+        async with aiohttp.ClientSession() as session:
+            tasks = [fetch(session, f"{self.url}{str(i)}.html", i) for i in range(1, 385)]
+            await asyncio.gather(*tasks)
 
 
 async def get_qianwen_by_web_main():
@@ -58,6 +63,4 @@ async def get_qianwen_by_web_main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_qianwen_by_web_main())
-    loop.close()
+    asyncio.run(get_qianwen_by_web_main())
