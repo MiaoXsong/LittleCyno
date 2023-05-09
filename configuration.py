@@ -26,6 +26,11 @@ class Config(object):
 
     def reload(self) -> None:
         yconfig = self._load_config()
-        self.ROBOTNAME = yconfig["robot_name"]
-        self.GROUPS = yconfig["groups"]["enable"]
-        self.SHOWAPI = yconfig.get("showapi")
+
+        self.ROBOT_NAME = yconfig["robot"]["robot_name"]
+        self.LOGGER_LEVEL = yconfig["robot"]["logger_level"]
+        self.GROUPS = yconfig["robot"]["groups"]["enable"]
+
+        self.CHOU_QIAN = yconfig["function"]["chouqian"]
+
+

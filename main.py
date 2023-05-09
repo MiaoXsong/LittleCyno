@@ -12,6 +12,8 @@ from robot import Robot
 from datetime import datetime
 from mylogger import MyLogger
 
+logger = MyLogger(logger_name="main").get_logger()
+
 
 class MyWcf(Wcf):
     """重写Wcf类，处理消息时多线程异步"""
@@ -69,8 +71,8 @@ def handler(sig, frame):
 
 signal.signal(signal.SIGINT, handler)
 
+logger.info("正在启动机器人···")
 robot = Robot(config, wcf)
-robot.LOG.info("正在启动机器人···")
 
 # 机器人启动发送测试消息
 robot.sendTextMsg(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}：机器人启动成功！", "filehelper")

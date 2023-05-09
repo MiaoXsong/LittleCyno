@@ -16,11 +16,27 @@ class Robot(Job):
     """
 
     def __init__(self, config: Config, wcf: Wcf) -> None:
+        self.function_dict = {}
         self.wcf = wcf
         self.config = config
-        self.LOG = MyLogger(logger_name="robot").get_logger()
+        self.robot_name = config.ROBOT_NAME
+        self.logger = MyLogger(logger_name="robot").get_logger()
         self.wxid = self.wcf.get_self_wxid()
         self.allContacts = self.getAllContacts()
+        self.load_function()
+
+    def load_function(self) -> None:
+        """
+        根据配置文件的功能开关加载功能
+        :return:
+        """
+        chouqian = self.config.CHOU_QIAN
+
+        if str(chouqian).lower() == 'on':
+            self.logger.info(f"正在加载抽签功能")
+            from function import chouqian
+            self.function_dict["抽签"] = chouqian.func_chouqian.chouQian
+            self.function_dict["解签"] = chouqian.func_chouqian.jieQian
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
@@ -44,6 +60,17 @@ class Robot(Job):
             if msg.roomid not in self.config.GROUPS:  # 不在配置的响应的群列表里，忽略
                 return
 
+            if str(msg.content).startswith(self.robot_name): # 如果消息以配置文件自定义的机器人名称开头
+                function_key = str(msg.content).split(self.robot_name)[-1]
+                if function_key in self.function_dict:
+                    self.logger.debug(f"进入到了功能函数：{function_key}")
+                    handler = self.function_dict.get(function_key)
+                    result = handler(msg)
+                    self.logger.debug(f"返回值是：{type(result)} 类型")
+                    if isinstance(result, str):
+                        self.sendTextMsg(result, msg.roomid, msg.sender)
+                return
+
             if msg.is_at(self.wxid):  # 被@
                 pass
 
@@ -54,7 +81,8 @@ class Robot(Job):
 
         # 非群聊信息，按消息类型进行处理
         if msg.type == 37:  # 好友请求
-            self.autoAcceptFriendRequest(msg)
+            # self.autoAcceptFriendRequest(msg)
+            pass
 
         elif msg.type == 10000:  # 系统信息
             self.sayHiToNewFriend(msg)
@@ -64,16 +92,16 @@ class Robot(Job):
             if msg.from_self():
                 if msg.content == "^更新$":
                     self.config.reload()
-                    self.LOG.info("已更新")
+                    self.logger.info("已更新")
             else:
                 pass  # 闲聊
 
     def onMsg(self, msg: WxMsg) -> int:
         try:
-            self.LOG.info(msg)  # 打印信息
+            self.logger.info(msg)  # 打印信息
             self.processMsg(msg)
         except Exception as e:
-            self.LOG.error(e)
+            self.logger.error(e)
 
         return 0
 
@@ -96,11 +124,11 @@ class Robot(Job):
 
         # {msg}{ats} 表示要发送的消息内容后面紧跟@，例如 北京天气情况为：xxx @张三，微信规定需这样写，否则@不生效
         if ats == "":
-            self.LOG.info(f"To {receiver}: {msg}")
+            self.logger.info(f"To {receiver}: {msg}")
             self.wcf.send_text(f"{msg}", receiver, at_list)
         else:
-            self.LOG.info(f"To {receiver}: {ats}\r{msg}")
-            self.wcf.send_text(f"{ats}\n\n{msg}", receiver, at_list)
+            self.logger.info(f"To {receiver}: {ats}\r{msg}")
+            self.wcf.send_text(f"{ats}\n{msg}", receiver, at_list)
 
     def getAllContacts(self) -> dict:
         """
@@ -126,7 +154,7 @@ class Robot(Job):
             self.wcf.accept_new_friend(v3, v4)
 
         except Exception as e:
-            self.LOG.error(f"同意好友出错：{e}")
+            self.logger.error(f"同意好友出错：{e}")
 
     def sayHiToNewFriend(self, msg: WxMsg) -> None:
         nickName = re.findall(r"你已添加了(.*)，现在可以开始聊天了。", msg.content)

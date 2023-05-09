@@ -1,7 +1,12 @@
-robot_name: '喵弟'
 
-groups:
-  enable: [] # 允许响应的群 roomId，大概长这样：2xxxxxxxxx3@chatroom
+robot:
+  robot_name: '喵弟' # 机器人的称呼
+  logger_level: 'INFO' # 日志级别（DEBUG、INFO、WARNING、ERROR、CRITICAL）
+  groups:
+    enable: [] # 允许响应的群 roomId，大概长这样：2xxxxxxxxx3@chatroom
+
+function:   # 功能开关，`ON`:开, `OFF`:关
+  chouqian: 'ON'  # 抽签功能
 
 showapi:
   my_appid:

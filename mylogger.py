@@ -2,10 +2,14 @@ import logging
 import os
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
+from configuration import Config
+
+config = Config()
+my_log_level = config.LOGGER_LEVEL
 
 
 class MyLogger:
-    def __init__(self, logger_name="default", log_level=logging.INFO, max_bytes=10 * 1024 * 1024, backup_count=20):
+    def __init__(self, logger_name="default", log_level=my_log_level, max_bytes=10 * 1024 * 1024, backup_count=20):
         current_file_path = Path(__file__)
         current_dir_path = current_file_path.parent
         self.log_dir = current_dir_path / "logs"

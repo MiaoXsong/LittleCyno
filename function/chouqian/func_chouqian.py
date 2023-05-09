@@ -1,6 +1,9 @@
 import asyncio
 
-from get_qianwen import get_qianwen_by_web, get_qianwen_by_local
+from wcferry import WxMsg
+
+from function.chouqian.get_qianwen import get_qianwen_by_web, get_qianwen_by_local
+from function.chouqian.chouqian import chou_qian, jieqian, init_db
 
 
 def getQianwenByWeb() -> None:
@@ -19,6 +22,32 @@ def getQianwenByLocal() -> None:
     :return:
     """
     asyncio.run(get_qianwen_by_local())
+
+
+def chouQian(msg: WxMsg) -> str:
+    """
+    抽签
+    :param msg: 微信消息结构
+    :return: None
+    """
+    return asyncio.run(chou_qian(msg))
+
+
+def jieQian(msg: WxMsg) -> str:
+    """
+    解签
+    :param msg: 微信消息结构
+    :return: None
+    """
+    return asyncio.run(jieqian(msg))
+
+
+def initUserDB() -> None:
+    """
+    创建抽签用户表
+    :return: None
+    """
+    asyncio.run(init_db())
 
 
 if __name__ == '__main__':
