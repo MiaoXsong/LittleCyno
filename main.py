@@ -12,6 +12,7 @@ from robot import Robot
 from datetime import datetime
 from mylogger import MyLogger
 
+
 class MyWcf(Wcf):
     """重写Wcf类，处理消息时多线程异步"""
 
@@ -56,32 +57,29 @@ class MyWcf(Wcf):
         return True
 
 
-def main():
-    config = Config()
-    # wcf = Wcf(debug=True)
-    wcf = MyWcf(debug=True)
-
-    def handler(sig, frame):
-        wcf.cleanup()  # 退出前清理环境
-        exit(0)
-
-    signal.signal(signal.SIGINT, handler)
-
-    robot = Robot(config, wcf)
-    robot.LOG.info("正在启动机器人···")
-
-    # 机器人启动发送测试消息
-    robot.sendTextMsg(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}：机器人启动成功！", "filehelper")
-
-    # 接收消息
-    robot.enableRecvMsg()
-
-    # 定时任务
-    # robot.onEveryTime("07:00", weather_report, robot=robot)
-
-    # 让机器人一直跑
-    robot.keepRunningAndBlockProcess()
+config = Config()
+# wcf = Wcf(debug=True)
+wcf = MyWcf(debug=True)
 
 
-if __name__ == "__main__":
-    main()
+def handler(sig, frame):
+    wcf.cleanup()  # 退出前清理环境
+    exit(0)
+
+
+signal.signal(signal.SIGINT, handler)
+
+robot = Robot(config, wcf)
+robot.LOG.info("正在启动机器人···")
+
+# 机器人启动发送测试消息
+robot.sendTextMsg(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}：机器人启动成功！", "filehelper")
+
+# 接收消息
+robot.enableRecvMsg()
+
+# 定时任务
+# robot.onEveryTime("07:00", weather_report, robot=robot)
+
+# 让机器人一直跑
+robot.keepRunningAndBlockProcess()

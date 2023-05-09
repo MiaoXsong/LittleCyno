@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 import aiosqlite
@@ -26,3 +27,27 @@ class AsyncSQLite:
             await cursor.execute(query, *args)
             result = await cursor.fetchall()
             return result
+
+
+async def main():
+    async_db = AsyncSQLite("test.db")
+
+    # 创建表
+    create_table_query = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)"
+    await async_db.execute(create_table_query)
+
+    # 添加用户
+    add_user_query = "INSERT INTO users (name, age) VALUES (?, ?)"
+    await async_db.execute(add_user_query, ("Alice", 25))
+    await async_db.execute(add_user_query, ("Bob", 30))
+
+    # 获取用户
+    get_users_query = "SELECT * FROM users"
+    users = await async_db.fetch(get_users_query)
+
+    for user in users:
+        print(user)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

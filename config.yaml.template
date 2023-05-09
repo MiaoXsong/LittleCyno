@@ -1,3 +1,5 @@
+robot_name: '喵弟'
+
 groups:
   enable: [] # 允许响应的群 roomId，大概长这样：2xxxxxxxxx3@chatroom
 
