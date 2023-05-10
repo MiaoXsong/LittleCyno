@@ -16,14 +16,19 @@ class Robot(Job):
     """
 
     def __init__(self, config: Config, wcf: Wcf) -> None:
+        self.logger = MyLogger(logger_name="robot").get_logger()
         self.function_dict = {}
         self.wcf = wcf
         self.config = config
         self.robot_name = config.ROBOT_NAME
-        self.logger = MyLogger(logger_name="robot").get_logger()
+        self.groups = self.config.GROUPS
+
         self.wxid = self.wcf.get_self_wxid()
         self.allContacts = self.getAllContacts()
         self.load_function()
+
+        self.logger.debug(f"机器人昵称：{self.robot_name}")
+        self.logger.debug(f"监控的群：{self.groups}")
 
     def load_function(self) -> None:
         """
@@ -31,6 +36,7 @@ class Robot(Job):
         :return:
         """
         chouqian = self.config.CHOU_QIAN
+        self.logger.debug(f"抽签开关：{chouqian}")
 
         if str(chouqian).lower() == 'on':
             self.logger.info(f"正在加载抽签功能")
@@ -57,7 +63,7 @@ class Robot(Job):
         # 群聊消息
         if msg.from_group():
             # 如果在群里被 @
-            if msg.roomid not in self.config.GROUPS:  # 不在配置的响应的群列表里，忽略
+            if msg.roomid not in self.groups:  # 不在配置的响应的群列表里，忽略
                 return
 
             if str(msg.content).startswith(self.robot_name): # 如果消息以配置文件自定义的机器人名称开头

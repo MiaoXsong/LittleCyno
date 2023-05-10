@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging.config
 import os
 import shutil
 
@@ -15,22 +14,28 @@ class Config(object):
     def _load_config(self) -> dict:
         pwd = os.path.dirname(os.path.abspath(__file__))
         try:
-            with open(f"{pwd}/config.yaml", "rb") as fp:
+            with open(f"{pwd}/conf/config.yaml", "rb") as fp:
                 yconfig = yaml.safe_load(fp)
         except FileNotFoundError:
-            shutil.copyfile(f"{pwd}/config.yaml.template", f"{pwd}/config.yaml")
-            with open(f"{pwd}/config.yaml", "rb") as fp:
+            shutil.copyfile(f"{pwd}/conf/config.yaml.template", f"{pwd}/conf/config.yaml")
+            with open(f"{pwd}/conf/config.yaml", "rb") as fp:
                 yconfig = yaml.safe_load(fp)
 
         return yconfig
 
     def reload(self) -> None:
         yconfig = self._load_config()
+        self.LOGGER_LEVEL = yconfig["logger"]["logger_level"]
+        self.LOGGER_MAX_BYTES = yconfig["logger"]["logger_max_bytes"]
+        self.LOGGER_BACKUP_COUNT = yconfig["logger"]["logger_backup_count"]
 
         self.ROBOT_NAME = yconfig["robot"]["robot_name"]
-        self.LOGGER_LEVEL = yconfig["robot"]["logger_level"]
         self.GROUPS = yconfig["robot"]["groups"]["enable"]
 
-        self.CHOU_QIAN = yconfig["function"]["chouqian"]
+        self.CHOU_QIAN = yconfig["function"]["chouqian"]["switch"]
+
+
+
+
 
 

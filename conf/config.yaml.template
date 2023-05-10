@@ -1,0 +1,17 @@
+logger:
+  logger_level: 'DEBUG' # 日志级别(DEBUG、INFO、WARNING、ERROR、CRITICAL)
+  logger_max_bytes: 10485760  # 存储单个文件最大的大小，默认10M
+  logger_backup_count: 20   #存储日志个数
+
+robot:
+  robot_name: '喵弟' # 机器人的称呼
+  groups:
+    enable: [] # 允许响应的群 roomId，大概长这样：2xxxxxxxxx3@chatroom
+
+function:   # 功能开关，`ON`:开, `OFF`:关
+  chouqian: # 抽签功能
+    switch: 'ON'
+
+showapi:
+  my_appid:
+  my_appsecret:

@@ -6,10 +6,13 @@ from configuration import Config
 
 config = Config()
 my_log_level = config.LOGGER_LEVEL
+my_log_max_bytes = int(config.LOGGER_MAX_BYTES)
+my_log_backup_count = int(config.LOGGER_BACKUP_COUNT)
 
 
 class MyLogger:
-    def __init__(self, logger_name="default", log_level=my_log_level, max_bytes=10 * 1024 * 1024, backup_count=20):
+    def __init__(self, logger_name="default", log_level=my_log_level, max_bytes=my_log_max_bytes,
+                 backup_count=my_log_backup_count):
         current_file_path = Path(__file__)
         current_dir_path = current_file_path.parent
         self.log_dir = current_dir_path / "logs"
