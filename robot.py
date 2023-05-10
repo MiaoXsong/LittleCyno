@@ -36,6 +36,7 @@ class Robot(Job):
         :return:
         """
         chouqian = self.config.CHOU_QIAN
+        xingzuo = self.config.XING_ZUO
         self.logger.debug(f"抽签开关：{chouqian}")
 
         if str(chouqian).lower() == 'on':
@@ -44,6 +45,9 @@ class Robot(Job):
             self.function_dict["抽签"] = chouqian.func_chouqian.chouQian
             self.function_dict["解签"] = chouqian.func_chouqian.jieQian
             self.onEveryTime("00:00", chouqian.func_chouqian.clearUserTable)
+        if str(xingzuo).lower() == 'on':
+            self.logger.info(f"正在加载星座运势功能")
+            from function import xingzuo
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息

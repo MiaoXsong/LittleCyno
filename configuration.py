@@ -33,6 +33,10 @@ class Config(object):
         self.GROUPS = yconfig["robot"]["groups"]["enable"]
 
         self.CHOU_QIAN = yconfig["function"]["chouqian"]["switch"]
+        self.XING_ZUO = yconfig["function"]["xingzuo"]["switch"]
+
+        self.SHOWAPI_ID = yconfig["showapi"]["appid"]
+        self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
 
 
 

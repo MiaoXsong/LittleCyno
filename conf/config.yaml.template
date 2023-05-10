@@ -11,7 +11,10 @@ robot:
 function:   # 功能开关，`ON`:开, `OFF`:关
   chouqian: # 抽签功能
     switch: 'ON'
+  xingzuo:  # 星座功能
+    switch: 'ON'
+
 
 showapi:
-  my_appid:
-  my_appsecret:
+  appid:
+  appsecret:
