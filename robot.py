@@ -43,6 +43,7 @@ class Robot(Job):
             from function import chouqian
             self.function_dict["抽签"] = chouqian.func_chouqian.chouQian
             self.function_dict["解签"] = chouqian.func_chouqian.jieQian
+            self.onEveryTime("00:00", chouqian.func_chouqian.clearUserTable)
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息

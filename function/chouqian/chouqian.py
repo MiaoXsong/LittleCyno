@@ -14,7 +14,7 @@ async_db = AsyncSQLite(db_name)
 
 async def init_db() -> None:
     """
-    创建签文用户表
+    创建抽签用户表
     :return: None
     """
     create_table_query = """
@@ -25,6 +25,16 @@ async def init_db() -> None:
         );
     """
     await async_db.execute(create_table_query)
+
+
+async def clear_user_table() -> None:
+    """
+    清空抽签用户表
+    :return: None
+    """
+    clear_table_query = 'DELETE FROM qian_user'
+    await async_db.execute(clear_table_query)
+
 
 
 async def select_qianwen_num(msg_sender: str) -> int or None:

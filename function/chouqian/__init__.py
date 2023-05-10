@@ -4,4 +4,4 @@ from function.chouqian import func_chouqian
 func_chouqian.getQianwenByLocal()
 
 """创建抽签用户表"""
-func_chouqian.initUserDB()
+func_chouqian.initUserTable()

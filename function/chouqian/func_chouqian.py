@@ -3,7 +3,7 @@ import asyncio
 from wcferry import WxMsg
 
 from function.chouqian.get_qianwen import get_qianwen_by_web, get_qianwen_by_local
-from function.chouqian.chouqian import chou_qian, jieqian, init_db
+from function.chouqian.chouqian import chou_qian, jieqian, init_db, clear_user_table
 
 
 def getQianwenByWeb() -> None:
@@ -42,7 +42,7 @@ def jieQian(msg: WxMsg) -> str:
     return asyncio.run(jieqian(msg))
 
 
-def initUserDB() -> None:
+def initUserTable() -> None:
     """
     创建抽签用户表
     :return: None
@@ -50,6 +50,15 @@ def initUserDB() -> None:
     asyncio.run(init_db())
 
 
+def clearUserTable() -> None:
+    """
+    清空抽签用户表
+    :return: None
+    """
+    asyncio.run(clear_user_table())
+
+
 if __name__ == '__main__':
     # getQianwenByWeb()
     getQianwenByLocal()
+    # clearUserTable()
