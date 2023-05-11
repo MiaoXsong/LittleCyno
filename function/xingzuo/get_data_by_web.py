@@ -68,9 +68,6 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
     app_id = conf.SHOWAPI_ID
     app_secret = conf.SHOWAPI_SECRET
 
-    # 为节省API的使用次数，只查询没有的数据就行了
-    xz_name_list = await existed_data(time)
-
     # 创建一个最大并发数为5的信号量，我的API限制1秒一次，可以根据自己的API并发量调整
     sem = asyncio.Semaphore(1)
 
@@ -107,6 +104,8 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
         await async_db.execute(insert_query, xinzuo_data)
 
     async with aiohttp.ClientSession() as session:
+        # 为节省API的使用次数，只查询没有的数据就行了
+        xz_name_list = await existed_data(time)
         tasks = [fetch(session, url, xz_name) for xz_name in xz_name_list]
         await asyncio.gather(*tasks)
 
