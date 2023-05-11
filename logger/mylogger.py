@@ -2,6 +2,9 @@ import logging
 import os
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
+
+from colorlog import ColoredFormatter
+
 from configuration import Config
 
 config = Config()
@@ -54,7 +57,29 @@ class MyLogger:
         console_handler = logging.StreamHandler()
         console_handler.setLevel(self.log_level)
 
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        # 定义 ColoredFormatter
+        formatter = ColoredFormatter(
+            "%(log_color)s%(levelname)-8s%(reset)s "
+            "%(white)s%(asctime)s%(reset)s "
+            "%(yellow)s%(name)-12s%(reset)s "
+            "%(log_color)s%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            reset=True,
+            log_colors={
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red',
+            },
+            secondary_log_colors={
+                'message': {
+                    'ERROR': 'red',
+                    'CRITICAL': 'red',
+                }
+            }
+        )
+
         console_handler.setFormatter(formatter)
 
         self.logger.addHandler(console_handler)
