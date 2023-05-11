@@ -45,6 +45,7 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
     :param time: `day`表示获取今天的数据，`tomorrow`表示获取明天的数据
     :return: None
     """
+
     async def existed_data(time: Literal['day', 'tomorrow']) -> list:
         if time == 'day':
             date = datetime.now().strftime('%Y%m%d')
@@ -96,15 +97,14 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
                         # 将 XinZuoProperty 对象的属性转换为可插入数据库的格式
                         xinzuo_data = tuple(xinzuo_obj.dict().values())
                         logger.debug(xinzuo_data)
-
-                        insert_query = 'INSERT OR REPLACE INTO xingzuo VALUES' \
-                                       ' (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-                        await async_db.execute(insert_query, xinzuo_data)
                     else:
                         logger.error(f"Unexpected Content-Type: {content_type}")
                 else:
                     logger.error(f"请求失败，状态码：{response.status}")
-            await asyncio.sleep(1)
+        await asyncio.sleep(1)
+        insert_query = 'INSERT OR REPLACE INTO xingzuo VALUES' \
+                       ' (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        await async_db.execute(insert_query, xinzuo_data)
 
     async with aiohttp.ClientSession() as session:
         tasks = [fetch(session, url, xz_name) for xz_name in xz_name_list]
