@@ -1,6 +1,5 @@
 from datetime import datetime
 import random
-from wcferry import WxMsg
 from database.async_sqlite import AsyncSQLite
 from configuration import Config
 from logger.logger_object import chouqian_logger
@@ -36,24 +35,24 @@ async def clear_user_table() -> None:
     await async_db.execute(clear_table_query)
 
 
-async def select_qianwen_num(msg_sender: str) -> int or None:
+async def select_qianwen_num(wx_id: str) -> int or None:
     """
     查询用户抽到的签文编号
-    :param msg_sender: 微信号
+    :param wx_id: 微信用户ID
     :return: 如果有数据返回 `int`签文号，否则返回`None`
     """
     select_sql = 'Select qian_num from qian_user Where qian_user = ?'
-    qianwen_num_tuple = await async_db.fetch(select_sql, (msg_sender,))
+    qianwen_num_tuple = await async_db.fetch(select_sql, (wx_id,))
     if not qianwen_num_tuple:
         return None
     else:
         return qianwen_num_tuple[0][0]
 
 
-async def jieqian(msg: WxMsg) -> str:
+async def jieqian(wx_id: str) -> str:
     """
     解签
-    :param msg: 微信消息结构
+    :param wx_id: 微信用户ID
     :return: 处理状态，`True` 成功，`False` 失败
     """
 
@@ -74,7 +73,7 @@ async def jieqian(msg: WxMsg) -> str:
     not_cq_str = f"----------------\n" \
                  f"你今天还没抽签！\n" \
                  f"请先发送【{robot_name}抽签】噢~"
-    qian_num = await select_qianwen_num(msg.sender)
+    qian_num = await select_qianwen_num(wx_id)
     if not qian_num:
         jieqian_str = not_cq_str
     else:
@@ -83,10 +82,10 @@ async def jieqian(msg: WxMsg) -> str:
     return jieqian_str
 
 
-async def chou_qian(msg: WxMsg) -> str:
+async def chou_qian(wx_id: str) -> str:
     """
     抽签
-    :param msg: 微信消息结构
+    :param wx_id: 微信id
     :return: `str` 回复字符串
     """
 
@@ -113,11 +112,11 @@ async def chou_qian(msg: WxMsg) -> str:
     yi_cq_str = f"----------------\n" \
                 f"今天已经抽过啦！\n" \
                 f"多抽不准噢！请明天再来试试吧~"
-    qian_num = await select_qianwen_num(msg.sender)
+    qian_num = await select_qianwen_num(wx_id)
     if not qian_num:
         qian_num = random.randint(1, 384)
         current_time = datetime.now().strftime("%H:%M:%S")
-        qian_user_tuple = (msg.sender, qian_num, current_time)
+        qian_user_tuple = (wx_id, qian_num, current_time)
         await update_qian_user_to_db(qian_user_tuple)
         qianwen_str = await get_qianwen(qian_num)
         cq_str = f"----------------\n" \

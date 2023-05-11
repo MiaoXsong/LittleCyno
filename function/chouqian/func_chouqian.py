@@ -30,7 +30,8 @@ def chouQian(msg: WxMsg) -> str:
     :param msg: 微信消息结构
     :return: 机器人回复的消息
     """
-    return asyncio.run(chou_qian(msg))
+    wx_id = msg.sender
+    return asyncio.run(chou_qian(wx_id))
 
 
 def jieQian(msg: WxMsg) -> str:
@@ -39,7 +40,8 @@ def jieQian(msg: WxMsg) -> str:
     :param msg: 微信消息结构
     :return: 机器人回复的消息
     """
-    return asyncio.run(jieqian(msg))
+    wx_id = msg.sender
+    return asyncio.run(jieqian(wx_id))
 
 
 def initUserTable() -> None:

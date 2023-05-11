@@ -75,13 +75,11 @@ logger.info("正在启动机器人···")
 robot = Robot(config, wcf)
 
 # 机器人启动发送测试消息
-robot.sendTextMsg(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}：机器人启动成功！", "filehelper")
+# robot.sendTextMsg(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}：机器人启动成功！", "filehelper")
+logger.info("机器人启动成功！")
 
 # 接收消息
 robot.enableRecvMsg()
-
-# 定时任务
-# robot.onEveryTime("07:00", weather_report, robot=robot)
 
 # 让机器人一直跑
 robot.keepRunningAndBlockProcess()
