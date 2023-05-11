@@ -25,19 +25,19 @@ class Config(object):
 
     def reload(self) -> None:
         yconfig = self._load_config()
+        """日志"""
         self.LOGGER_LEVEL = yconfig["logger"]["logger_level"]
         self.LOGGER_MAX_BYTES = yconfig["logger"]["logger_max_bytes"]
         self.LOGGER_BACKUP_COUNT = yconfig["logger"]["logger_backup_count"]
-
+        """机器人"""
         self.ROBOT_NAME = yconfig["robot"]["robot_name"]
         self.GROUPS = yconfig["robot"]["groups"]["enable"]
-
+        """功能"""
         self.CHOU_QIAN = yconfig["function"]["chouqian"]["switch"]
         self.XING_ZUO = yconfig["function"]["xingzuo"]["switch"]
-
+        """show_api"""
         self.SHOWAPI_ID = yconfig["showapi"]["appid"]
         self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
-
 
 
 
