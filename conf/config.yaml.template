@@ -15,6 +15,6 @@ function:   # 功能开关，`ON`:开, `OFF`:关
     switch: 'ON'
 
 
-showapi:
+showapi:    # https://www.showapi.com/
   appid:
   appsecret:
