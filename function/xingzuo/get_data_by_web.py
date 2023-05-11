@@ -98,7 +98,7 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
                         logger.error(f"无法获取星座数据信息，请确认配置文件中showAPI是否填写正确，并且是否还有剩余次数")
                 else:
                     logger.error(f"请求失败，状态码：{response.status}")
-        await asyncio.sleep(1)
+                await asyncio.sleep(1)
         insert_query = 'INSERT OR REPLACE INTO xingzuo VALUES' \
                        ' (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         await async_db.execute(insert_query, xinzuo_data)
