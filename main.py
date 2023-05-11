@@ -4,7 +4,7 @@
 import signal
 from threading import Thread
 from typing import Callable
-
+from pyfiglet import Figlet
 from wcferry import Wcf, WxMsg, wcf_pb2
 
 from configuration import Config
@@ -13,6 +13,9 @@ from datetime import datetime
 from logger.logger_object import main_logger
 
 logger = main_logger
+
+logo = Figlet(font='slant').renderText('LittleCyno')
+print(f"\033[1;95m{logo}")
 
 
 class MyWcf(Wcf):
