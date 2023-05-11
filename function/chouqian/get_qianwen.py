@@ -5,13 +5,12 @@ from pathlib import Path
 import aiohttp
 from bs4 import BeautifulSoup
 from database.async_sqlite import AsyncSQLite
-from mylogger import MyLogger
+from logger.logger_object import chouqian_logger
 
-
-logger = MyLogger(logger_name="chouqian").get_logger()
 db_name = "ChouQian.db"
 async_db = AsyncSQLite(db_name)
 url = 'https://www.ttlingqian.com/zhuge/'
+logger = chouqian_logger
 
 
 async def init_db() -> None:

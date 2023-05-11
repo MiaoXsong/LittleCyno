@@ -15,7 +15,7 @@ class MyLogger:
                  backup_count=my_log_backup_count):
         current_file_path = Path(__file__)
         current_dir_path = current_file_path.parent
-        self.log_dir = current_dir_path / "logs"
+        self.log_dir = current_dir_path / "../logs"
         self.log_level = log_level
         self.max_bytes = max_bytes
         self.backup_count = backup_count

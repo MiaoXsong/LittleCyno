@@ -8,7 +8,7 @@ from wcferry import Wcf, WxMsg
 
 from configuration import Config
 from job_mgmt import Job
-from mylogger import MyLogger
+from logger.logger_object import robot_logger
 
 
 class Robot(Job):
@@ -16,7 +16,7 @@ class Robot(Job):
     """
 
     def __init__(self, config: Config, wcf: Wcf) -> None:
-        self.logger = MyLogger(logger_name="robot").get_logger()
+        self.logger = robot_logger
         self.function_dict = {}
         self.wcf = wcf
         self.config = config
@@ -48,7 +48,12 @@ class Robot(Job):
         if str(xingzuo).lower() == 'on':
             self.logger.info(f"正在加载星座运势功能")
             from function import xingzuo
-
+            xingzuo_key_list = list(xingzuo.character.xz_name_dict.keys())
+            xingzuo_function = xingzuo.func_xingzuo.xingZuo
+            self.function_dict.update({key: xingzuo_function for key in xingzuo_key_list})
+            # 每天晚上8点更新第二天的星座信息
+            self.onEveryTime("20:00", xingzuo.func_xingzuo.getXzDataByWeb, time='tomorrow')
+        self.logger.debug(f"功能点为：{self.function_dict}")
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
         :param msg: 微信消息结构
@@ -71,7 +76,7 @@ class Robot(Job):
             if msg.roomid not in self.groups:  # 不在配置的响应的群列表里，忽略
                 return
 
-            if str(msg.content).startswith(self.robot_name): # 如果消息以配置文件自定义的机器人名称开头
+            if str(msg.content).startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
                 function_key = str(msg.content).split(self.robot_name)[-1]
                 if function_key in self.function_dict:
                     self.logger.debug(f"进入到了功能函数：{function_key}")

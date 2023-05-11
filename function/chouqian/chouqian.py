@@ -1,15 +1,15 @@
 from datetime import datetime
 import random
-from mylogger import MyLogger
 from wcferry import WxMsg
 from database.async_sqlite import AsyncSQLite
 from configuration import Config
+from logger.logger_object import chouqian_logger
 
-logger = MyLogger(logger_name="chouqian").get_logger()
 config = Config()
 robot_name = config.ROBOT_NAME
 db_name = "ChouQian.db"
 async_db = AsyncSQLite(db_name)
+logger = chouqian_logger
 
 
 async def init_db() -> None:
@@ -34,7 +34,6 @@ async def clear_user_table() -> None:
     """
     clear_table_query = 'DELETE FROM qian_user'
     await async_db.execute(clear_table_query)
-
 
 
 async def select_qianwen_num(msg_sender: str) -> int or None:

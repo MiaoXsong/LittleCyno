@@ -10,9 +10,9 @@ from wcferry import Wcf, WxMsg, wcf_pb2
 from configuration import Config
 from robot import Robot
 from datetime import datetime
-from mylogger import MyLogger
+from logger.logger_object import main_logger
 
-logger = MyLogger(logger_name="main").get_logger()
+logger = main_logger
 
 
 class MyWcf(Wcf):
