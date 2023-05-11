@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 import aiohttp
 from function.xingzuo import character
 from database.async_sqlite import AsyncSQLite
-from mylogger import MyLogger
+from logger.logger_object import xingzuo_logger
 from configuration import Config
 from typing import Literal
 
 db_name = 'XingZuo.db'
-logger = MyLogger(logger_name="xingzuo").get_logger()
+logger = xingzuo_logger
 async_db = AsyncSQLite(db_name)
 
 
@@ -57,7 +57,7 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
         xz_name_set = {xz_name for xz_name_tuple in xz_name_tuple_list for xz_name in xz_name_tuple}
         logger.debug(f"{date}已存在{xz_name_set}星座的数据")
 
-        xz_name_all_set = set(character.xz_name_list)
+        xz_name_all_set = set(character.xz_pinyin_list)
         need_xz_name_list = list(xz_name_all_set - xz_name_set)
         logger.debug(f"{date}需要获取{need_xz_name_list}星座的数据")
 
@@ -95,7 +95,7 @@ async def get_xz_data_by_web(time: Literal['day', 'tomorrow']) -> None:
                         xinzuo_data = tuple(xinzuo_obj.dict().values())
                         logger.debug(xinzuo_data)
                     else:
-                        logger.error(f"Unexpected Content-Type: {content_type}")
+                        logger.error(f"无法获取星座数据信息，请确认配置文件中showAPI是否填写正确，并且是否还有剩余次数")
                 else:
                     logger.error(f"请求失败，状态码：{response.status}")
         await asyncio.sleep(1)

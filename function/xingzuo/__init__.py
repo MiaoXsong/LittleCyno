@@ -1,5 +1,4 @@
-from function.xingzuo import func_xingzuo
-
+from function.xingzuo import func_xingzuo, character
 
 """初始化星座表"""
 func_xingzuo.initXzTable()

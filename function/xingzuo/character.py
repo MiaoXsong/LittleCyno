@@ -39,7 +39,22 @@ class XinZuoProperty(BaseModel):
     """吉色"""
 
 
-xz_name_list = [
+xz_name_dict = {
+    '白羊': 'baiyang',
+    '金牛': 'jinniu',
+    '双子': 'shuangzi',
+    '巨蟹': 'juxie',
+    '狮子': 'shizi',
+    '处女': 'chunv',
+    '天秤': 'tiancheng',
+    '天蝎': 'tianxie',
+    '射手': 'sheshou',
+    '摩羯': 'mojie',
+    '水瓶': 'shuiping',
+    '双鱼': 'shuangyu'
+}
+
+xz_pinyin_list = [
     'baiyang',
     'jinniu',
     'shuangzi',
@@ -53,7 +68,6 @@ xz_name_list = [
     'shuiping',
     'shuangyu'
 ]
-
 
 xz_emoji_dict = {
     'baiyang': '♈',

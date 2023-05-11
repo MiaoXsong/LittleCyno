@@ -54,6 +54,7 @@ class Robot(Job):
             # 每天晚上8点更新第二天的星座信息
             self.onEveryTime("20:00", xingzuo.func_xingzuo.getXzDataByWeb, time='tomorrow')
         self.logger.debug(f"功能点为：{self.function_dict}")
+
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
         :param msg: 微信消息结构
@@ -78,6 +79,7 @@ class Robot(Job):
 
             if str(msg.content).startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
                 function_key = str(msg.content).split(self.robot_name)[-1]
+                self.logger.debug(f"获取到的功能关键字为：{function_key}")
                 if function_key in self.function_dict:
                     self.logger.debug(f"进入到了功能函数：{function_key}")
                     handler = self.function_dict.get(function_key)
