@@ -28,7 +28,7 @@ def chouQian(msg: WxMsg) -> str:
     """
     抽签
     :param msg: 微信消息结构
-    :return: None
+    :return: 机器人回复的消息
     """
     return asyncio.run(chou_qian(msg))
 
@@ -37,7 +37,7 @@ def jieQian(msg: WxMsg) -> str:
     """
     解签
     :param msg: 微信消息结构
-    :return: None
+    :return: 机器人回复的消息
     """
     return asyncio.run(jieqian(msg))
 
