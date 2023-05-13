@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import Path
 
 import aiosqlite
@@ -6,14 +7,18 @@ import aiosqlite
 
 class AsyncSQLite:
     def __init__(self, db_name):
+        db_data = 'db_data'
         # 创建一个Path对象
         current_file_path = Path(__file__)
 
-        # 获取当前文件所在的目录
+        # 获取当前文件所在的目录上级目录
         current_dir_path = current_file_path.parent.parent
 
+        if not os.path.exists(current_dir_path / db_data):
+            os.makedirs(current_dir_path / db_data)
+
         # 构建数据文件路径
-        self.db_file = current_dir_path / 'db_data' / db_name
+        self.db_file = current_dir_path / db_data / db_name
 
     async def execute(self, query, *args):
         async with aiosqlite.connect(self.db_file) as db:
