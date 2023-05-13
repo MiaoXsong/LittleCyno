@@ -13,6 +13,8 @@ function:   # 功能开关，`ON`:开, `OFF`:关
     switch: 'ON'
   xingzuo:  # 星座运势功能，启用此功能请先填写下方`showapi`相关信息
     switch: 'OFF'
+  yuanshen: # 原神功能
+    switch: 'ON'
 
 showapi:    # https://www.showapi.com/ 星座运势功能必填，注册后每天免费50次的API的调用
   appid:

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import os
 import re
 import time
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from wcferry import Wcf, WxMsg
 
 from configuration import Config
 from job_mgmt import Job
 from logger.logger_object import robot_logger
+from functools import partial
 
 
 class Robot(Job):
@@ -30,6 +33,12 @@ class Robot(Job):
         self.logger.debug(f"机器人昵称：{self.robot_name}")
         self.logger.debug(f"监控的群：{self.groups}")
 
+        current_file_path = Path(__file__)
+        current_dir_path = current_file_path.parent
+        self.temp_path = current_dir_path / "temp"
+        if not os.path.exists(self.temp_path):
+            os.makedirs(self.temp_path)
+
     def load_function(self) -> None:
         """
         根据配置文件的功能开关加载功能
@@ -37,23 +46,34 @@ class Robot(Job):
         """
         chouqian = self.config.CHOU_QIAN
         xingzuo = self.config.XING_ZUO
+        yuanshen = self.config.YUAN_SHEN
         self.logger.debug(f"抽签开关：{chouqian}")
 
         if str(chouqian).lower() == 'on':
             self.logger.info(f"正在加载抽签功能")
             from function import chouqian
-            self.function_dict["抽签"] = chouqian.func_chouqian.chouQian
-            self.function_dict["解签"] = chouqian.func_chouqian.jieQian
+            self.function_dict["抽签"] = partial(chouqian.func_chouqian.chouQian, func_send_text_msg=self.sendTextMsg)
+            self.function_dict["解签"] = partial(chouqian.func_chouqian.jieQian, func_send_text_msg=self.sendTextMsg)
             self.onEveryTime("00:00", chouqian.func_chouqian.clearUserTable)
         if str(xingzuo).lower() == 'on':
-            self.logger.info(f"正在加载星座运势功能")
+            self.logger.info(f"正在加载星座运势功能(首次运行可能会比较慢哦~)")
             from function import xingzuo
             xingzuo_key_list = list(xingzuo.character.xz_name_dict.keys())
-            xingzuo_function = xingzuo.func_xingzuo.xingZuo
+            xingzuo_function = partial(xingzuo.func_xingzuo.xingZuo, func_send_text_msg=self.sendTextMsg)
             self.function_dict.update({key: xingzuo_function for key in xingzuo_key_list})
             # 每天晚上8点更新第二天的星座信息
             self.onEveryTime("20:00", xingzuo.func_xingzuo.getXzDataByWeb, time='tomorrow')
         self.logger.debug(f"功能点为：{self.function_dict}")
+        if str(yuanshen).lower() == 'on':
+            self.logger.info(f"正在加载原神功能")
+            from function import yuanshen
+            self.function_dict["原神绑定"] = partial(
+                yuanshen.generateLoginData,
+                func_send_text_msg=self.sendTextMsg,
+                func_send_img_msg=self.wcf.send_image,
+                robot_name=self.robot_name)
+            # 每10秒去查询一次米有社二维码登陆信息
+            self.onEverySeconds(10, yuanshen.checkQrcode, func_send_text_msg=self.sendTextMsg)
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
@@ -83,10 +103,8 @@ class Robot(Job):
                 if function_key in self.function_dict:
                     self.logger.debug(f"进入到了功能函数：{function_key}")
                     handler = self.function_dict.get(function_key)
-                    result = handler(msg)
-                    self.logger.debug(f"返回值是：{type(result)} 类型")
-                    if isinstance(result, str):
-                        self.sendTextMsg(result, msg.roomid, msg.sender)
+                    handler(msg=msg)
+
                 return
 
             if msg.is_at(self.wxid):  # 被@
