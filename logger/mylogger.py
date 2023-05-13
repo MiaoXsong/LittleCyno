@@ -17,8 +17,8 @@ class MyLogger:
     def __init__(self, logger_name="default", log_level=my_log_level, max_bytes=my_log_max_bytes,
                  backup_count=my_log_backup_count):
         current_file_path = Path(__file__)
-        current_dir_path = current_file_path.parent
-        self.log_dir = current_dir_path / "../logs"
+        current_dir_path = current_file_path.parent.parent
+        self.log_dir = current_dir_path / "logs"
         self.log_level = log_level
         self.max_bytes = max_bytes
         self.backup_count = backup_count
@@ -26,33 +26,33 @@ class MyLogger:
         self._configure_logger()
 
     def _configure_logger(self):
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
-
         self.logger = logging.getLogger(self.logger_name)
         self.logger.setLevel(logging.DEBUG)
 
-        log_levels = {
-            logging.DEBUG: "debug",
-            logging.INFO: "info",
-            logging.WARNING: "warning",
-            logging.ERROR: "error",
-            logging.CRITICAL: "critical"
-        }
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
 
-        for level, level_name in log_levels.items():
-            file_handler = RotatingFileHandler(
-                f"{self.log_dir}/cyno_{level_name}.log",
-                encoding="utf-8",
-                maxBytes=self.max_bytes,
-                backupCount=self.backup_count
-            )
-            file_handler.setLevel(level)
+        # log_levels = {
+        #     logging.DEBUG: "debug",
+        #     logging.INFO: "info",
+        #     logging.WARNING: "warning",
+        #     logging.ERROR: "error",
+        #     logging.CRITICAL: "critical"
+        # }
 
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            file_handler.setFormatter(formatter)
-
-            self.logger.addHandler(file_handler)
+        # for level, level_name in log_levels.items():
+        #     file_handler = RotatingFileHandler(
+        #         f"{self.log_dir}/cyno_{level_name}.log",
+        #         encoding="utf-8",
+        #         maxBytes=self.max_bytes,
+        #         backupCount=self.backup_count
+        #     )
+        #     file_handler.setLevel(level)
+        #
+        #     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        #     file_handler.setFormatter(formatter)
+        #
+        #     self.logger.addHandler(file_handler)
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(self.log_level)
