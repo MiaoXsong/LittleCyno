@@ -1,5 +1,7 @@
 from datetime import datetime
 import random
+from typing import Callable
+
 from database.async_sqlite import AsyncSQLite
 from configuration import Config
 from logger.logger_object import chouqian_logger
@@ -49,11 +51,13 @@ async def select_qianwen_num(wx_id: str) -> int or None:
         return qianwen_num_tuple[0][0]
 
 
-async def jieqian(wx_id: str) -> str:
+async def jieqian(send_txt_msg: Callable[[str, str, str], None], group_id: str, user_id: str) -> None:
     """
     解签
-    :param wx_id: 微信用户ID
-    :return: 处理状态，`True` 成功，`False` 失败
+    :param send_txt_msg: 文本消息回复函数
+    :param group_id: 群ID
+    :param user_id: 用户ID
+    :return: None
     """
 
     async def get_jieqian(qianwen_num: int) -> str:
@@ -73,20 +77,22 @@ async def jieqian(wx_id: str) -> str:
     not_cq_str = f"----------------\n" \
                  f"你今天还没抽签！\n" \
                  f"请先发送【{robot_name}抽签】噢~"
-    qian_num = await select_qianwen_num(wx_id)
+    qian_num = await select_qianwen_num(user_id)
     if not qian_num:
         jieqian_str = not_cq_str
     else:
         jieqian_str = await get_jieqian(qian_num)
     logger.debug(f"{jieqian_str}")
-    return jieqian_str
+    send_txt_msg(jieqian_str, group_id, user_id)
 
 
-async def chou_qian(wx_id: str) -> str:
+async def chou_qian(send_txt_msg: Callable[[str, str, str], None], group_id: str, user_id: str) -> None:
     """
     抽签
-    :param wx_id: 微信id
-    :return: `str` 回复字符串
+    :param send_txt_msg: 文本消息回复函数
+    :param group_id: 群ID
+    :param user_id: 用户ID
+    :return: None
     """
 
     async def update_qian_user_to_db(qian_user_tuple: tuple) -> None:
@@ -112,11 +118,11 @@ async def chou_qian(wx_id: str) -> str:
     yi_cq_str = f"----------------\n" \
                 f"今天已经抽过啦！\n" \
                 f"多抽不准噢！请明天再来试试吧~"
-    qian_num = await select_qianwen_num(wx_id)
+    qian_num = await select_qianwen_num(user_id)
     if not qian_num:
         qian_num = random.randint(1, 384)
         current_time = datetime.now().strftime("%H:%M:%S")
-        qian_user_tuple = (wx_id, qian_num, current_time)
+        qian_user_tuple = (user_id, qian_num, current_time)
         await update_qian_user_to_db(qian_user_tuple)
         qianwen_str = await get_qianwen(qian_num)
         cq_str = f"----------------\n" \
@@ -128,4 +134,4 @@ async def chou_qian(wx_id: str) -> str:
     else:
         cq_str = yi_cq_str
     logger.debug(cq_str)
-    return cq_str
+    send_txt_msg(cq_str, group_id, user_id)

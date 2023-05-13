@@ -1,5 +1,5 @@
 import asyncio
-from typing import Literal
+from typing import Literal, Callable
 
 from wcferry import WxMsg
 from function.xingzuo.character import xz_name_dict
@@ -14,7 +14,7 @@ robot_name = config.ROBOT_NAME
 def initXzTable() -> None:
     """
     初始化星座表
-    :return:
+    :return: None
     """
     asyncio.run(init_xz_table())
 
@@ -28,11 +28,15 @@ def getXzDataByWeb(time: Literal['day', 'tomorrow']) -> None:
     asyncio.run(get_xz_data_by_web(time))
 
 
-def xingZuo(msg: WxMsg) -> str:
+def xingZuo(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> None:
     """
     星座运势
-    :param xz_name: 星座的名称，例如 `tiancheng`
-    :return: 机器人回复的消息
+    :param func_send_text_msg: 文本消息回复方法
+    :param msg: 微信消息结构
+    :return: None
     """
     xz_name = str(msg.content).split(robot_name)[-1]
-    return asyncio.run(xing_zuo(xz_name_dict[xz_name]))
+    asyncio.run(xing_zuo(send_txt_msg=func_send_text_msg,
+                         user_id=msg.sender,
+                         group_id=msg.roomid,
+                         xz_name=xz_name_dict[xz_name]))

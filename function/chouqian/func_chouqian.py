@@ -1,4 +1,5 @@
 import asyncio
+from typing import Callable
 
 from wcferry import WxMsg
 
@@ -24,24 +25,24 @@ def getQianwenByLocal() -> None:
     asyncio.run(get_qianwen_by_local())
 
 
-def chouQian(msg: WxMsg) -> str:
+def chouQian(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> None:
     """
     抽签
+    :param func_send_text_msg: 文本消息回复方法
     :param msg: 微信消息结构
-    :return: 机器人回复的消息
+    :return: None
     """
-    wx_id = msg.sender
-    return asyncio.run(chou_qian(wx_id))
+    asyncio.run(chou_qian(send_txt_msg=func_send_text_msg, user_id=msg.sender, group_id=msg.roomid))
 
 
-def jieQian(msg: WxMsg) -> str:
+def jieQian(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> None:
     """
     解签
+    :param func_send_text_msg: 文本消息回复方法
     :param msg: 微信消息结构
-    :return: 机器人回复的消息
+    :return: None
     """
-    wx_id = msg.sender
-    return asyncio.run(jieqian(wx_id))
+    asyncio.run(jieqian(send_txt_msg=func_send_text_msg, user_id=msg.sender, group_id=msg.roomid))
 
 
 def initUserTable() -> None:
@@ -60,7 +61,7 @@ def clearUserTable() -> None:
     asyncio.run(clear_user_table())
 
 
-if __name__ == '__main__':
-    # getQianwenByWeb()
-    getQianwenByLocal()
-    # clearUserTable()
+# if __name__ == '__main__':
+#     # getQianwenByWeb()
+#     getQianwenByLocal()
+#     # clearUserTable()

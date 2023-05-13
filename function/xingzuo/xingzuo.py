@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Callable
+
 from function.xingzuo.character import XinZuoProperty, xz_emoji_dict, xz_fanyi_dict
 from logger.logger_object import xingzuo_logger
 from database.async_sqlite import AsyncSQLite
@@ -8,7 +10,7 @@ logger = xingzuo_logger
 async_db = AsyncSQLite(db_name)
 
 
-async def xing_zuo(xz_name: str) -> str:
+async def xing_zuo(send_txt_msg: Callable[[str, str, str], None], user_id: str, group_id: str, xz_name: str) -> str:
     date_now = datetime.now().strftime('%Y%m%d')
     query_sql = "SELECT * FROM xingzuo WHERE time = ? AND xz_name = ?"
     xz_tuple_list = await async_db.fetch(query_sql, (date_now, xz_name,))
@@ -28,5 +30,5 @@ async def xing_zuo(xz_name: str) -> str:
                   f"{xinzuo_emoji}贵人星座：{xz_data_dict['grxz']}\n" \
                   f"{xinzuo_emoji}今日提醒：{xz_data_dict['day_notice']}"
     logger.debug(f"回复的信息为\n{xingzuo_str}")
-    return xingzuo_str
+    send_txt_msg(xingzuo_str, group_id, user_id)
 
