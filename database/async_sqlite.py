@@ -10,10 +10,10 @@ class AsyncSQLite:
         current_file_path = Path(__file__)
 
         # 获取当前文件所在的目录
-        current_dir_path = current_file_path.parent
+        current_dir_path = current_file_path.parent.parent
 
         # 构建数据文件路径
-        self.db_file = current_dir_path / db_name
+        self.db_file = current_dir_path / 'db_data' / db_name
 
     async def execute(self, query, *args):
         async with aiosqlite.connect(self.db_file) as db:
