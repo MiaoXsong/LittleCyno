@@ -75,6 +75,15 @@ class Robot(Job):
             # 每10秒去查询一次米有社二维码登陆信息
             self.onEverySeconds(10, yuanshen.checkQrcode, func_send_text_msg=self.sendTextMsg)
 
+            self.function_dict["原神定时签到开启"] = partial(
+                yuanshen.onSign,
+                func_send_text_msg=self.sendTextMsg,
+                robot_name=self.robot_name)
+            self.function_dict["原神定时签到关闭"] = partial(
+                yuanshen.offSign,
+                func_send_text_msg=self.sendTextMsg,
+                robot_name=self.robot_name)
+
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
         :param msg: 微信消息结构
