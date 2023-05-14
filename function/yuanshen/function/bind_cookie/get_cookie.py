@@ -51,15 +51,15 @@ async def init_db() -> None:
             stoken TEXT
         );
     """
-    create_cookie_last_genshin_table_query = """
-            CREATE TABLE IF NOT EXISTS cookie_last_genshin (
+    create_last_genshin_table_query = """
+            CREATE TABLE IF NOT EXISTS last_genshin (
                 user_id TEXT PRIMARY KEY,
                 uid INTEGER,
                 last_time TEXT
             );
         """
     sql_list = [create_private_cookies_table_query,
-                create_cookie_last_genshin_table_query]
+                create_last_genshin_table_query]
     tasks = [async_db.execute(sql) for sql in sql_list]
     await asyncio.gather(*tasks)
 
@@ -209,7 +209,7 @@ async def check_qrcode(send_txt_msg: Callable[[str, str, str], None]):
                                                            "VALUES (?, ?, ?, ?, ?)"
                             await async_db.execute(insert_private_cookies_query, private_cookie_tuple)
                         send_msg = send_msg.strip()
-                        insert_cookie_last_genshin_query = "INSERT OR REPLACE INTO cookie_last_genshin (" \
+                        insert_cookie_last_genshin_query = "INSERT OR REPLACE INTO last_genshin (" \
                                                            "user_id, uid, last_time) VALUES (?, ?, ?)"
                         await async_db.execute(
                             insert_cookie_last_genshin_query,
