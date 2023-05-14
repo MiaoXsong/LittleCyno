@@ -37,6 +37,7 @@ tmp_path = current_dir_path / "tmp"
 if not os.path.exists(tmp_path):
     os.makedirs(tmp_path)
 
+
 async def init_db() -> None:
     """
     创建原神Cookie表
@@ -48,7 +49,8 @@ async def init_db() -> None:
             uid INTEGER,
             mys_id INTEGER,
             cookie TEXT,
-            stoken TEXT
+            stoken TEXT,
+            status INTEGER default 1
         );
     """
     create_last_genshin_table_query = """
