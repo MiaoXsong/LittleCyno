@@ -22,7 +22,9 @@ from function.yuanshen.utils.requests import aiorequests
 from function.yuanshen.utils.api import get_bind_game_info
 from logger.logger_object import yuanshen_logger
 from database.async_sqlite import AsyncSQLite
+from configuration import Config
 
+robot_name = Config().ROBOT_NAME
 CN_DS_SALT = 'JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS'
 
 running_login_data = {}
@@ -147,8 +149,7 @@ async def get_cookie_token(game_token: dict):
 
 
 async def generate_login_data(send_text_msg: Callable[[str, str, str], None],
-                              send_img_msg: Callable[[str, str], None],
-                              robot_name, user_id: str, group_id: str):
+                              send_img_msg: Callable[[str, str], None], user_id: str, group_id: str):
     if str(user_id) in running_login_data:
         return '你已经在绑定中了，请扫描上一次的二维码'
     login_data = await create_login_data()

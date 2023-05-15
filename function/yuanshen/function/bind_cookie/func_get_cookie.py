@@ -12,17 +12,15 @@ def initCookieTable() -> None:
     asyncio.run(init_db())
 
 
-def generateLoginData(func_send_text_msg, func_send_img_msg, robot_name, msg: WxMsg) -> None:
+def generateLoginData(func_send_text_msg, func_send_img_msg, msg: WxMsg) -> None:
     """
     创建并发送登陆二维码
     :param func_send_text_msg: 文本消息发送方法
     :param func_send_img_msg: 图片消息发送方法
-    :param robot_name: 机器人名称
     :param msg: 微信消息结构体
     :return: None
     """
-    asyncio.run(generate_login_data(func_send_text_msg, func_send_img_msg,
-                                    robot_name, msg.sender, msg.roomid))
+    asyncio.run(generate_login_data(func_send_text_msg, func_send_img_msg, msg.sender, msg.roomid))
 
 
 def checkQrcode(func_send_text_msg) -> None:
