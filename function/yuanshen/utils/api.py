@@ -5,12 +5,13 @@ import random
 import time
 from typing import Literal, Optional, Union
 
-import function.yuanshen.database.cookie
 from logger.logger_object import yuanshen_logger
 from function.yuanshen.utils.requests import aiorequests
 from function.yuanshen.database.cookie import PrivateCookie
 from database.async_sqlite import AsyncSQLite
+from configuration import Config
 
+robot_name = Config().ROBOT_NAME
 db_name = 'YuanShen.db'
 logger = yuanshen_logger
 async_db = AsyncSQLite(db_name)
@@ -27,6 +28,7 @@ DAILY_NOTE_API = (
 )
 SIGN_INFO_API = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/info'
 SIGN_ACTION_API = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/sign'
+SIGN_REWARD_API = 'https://api-takumi.mihoyo.com/event/bbs_sign_reward/home'
 
 
 def md5(text: str) -> str:
@@ -39,6 +41,33 @@ def md5(text: str) -> str:
     md5_ = hashlib.md5()
     md5_.update(text.encode())
     return md5_.hexdigest()
+
+
+def random_hex(length: int) -> str:
+    """
+    生成指定长度的随机字符串
+
+    :param length: 长度
+    :return: 随机字符串
+    """
+    result = hex(random.randint(0, 16 ** length)).replace('0x', '').upper()
+    if len(result) < length:
+        result = '0' * (length - len(result)) + result
+    return result
+
+
+def get_old_version_ds(mhy_bbs: bool = False) -> str:
+    """
+    生成米游社旧版本headers的ds_token
+    """
+    if mhy_bbs:
+        s = 'N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep'
+    else:
+        s = 'z8DRIUjNDT7IT5IZXvrUAxyupA1peND9'
+    t = str(int(time.time()))
+    r = ''.join(random.sample(string.ascii_lowercase + string.digits, 6))
+    c = md5(f"salt={s}&t={t}&r={r}")
+    return f"{t},{r},{c}"
 
 
 def get_ds(q: str = '', b: dict = None, mhy_bbs_sign: bool = False) -> str:
@@ -106,6 +135,22 @@ def mihoyo_sign_headers(cookie: str, extra_headers: Optional[dict] = None) -> di
     return header
 
 
+async def get_sign_reward_list() -> dict:
+    headers = {
+        'x-rpc-app_version': '2.11.1',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 ('
+                      'KHTML, like Gecko) miHoYoBBS/2.11.1',
+        'x-rpc-client_type': '5',
+        'Referer': 'https://webstatic.mihoyo.com/',
+    }
+    resp = await aiorequests.get(
+        url=SIGN_REWARD_API, headers=headers, params={'act_id': 'e202009291139501'}
+    )
+    data = resp.json()
+    logger.debug(data)
+    return data
+
+
 async def check_retcode(data: dict, cookie_info, user_id: str, uid: str) -> bool:
     """
     检查数据响应状态冰进行响应处理
@@ -163,6 +208,31 @@ async def get_bind_game_info(cookie: str, mys_id: str):
     return None
 
 
+def mihoyo_sign_headers(cookie: str, extra_headers: Optional[dict] = None) -> dict:
+    """
+    生成米游社签到headers
+        :param cookie: cookie
+        :param extra_headers: 额外的headers参数
+        :return: headers
+    """
+    header = {
+        'User_Agent': 'Mozilla/5.0 (Linux; Android 12; Unspecified Device) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Version/4.0 Chrome/103.0.5060.129 Mobile Safari/537.36 miHoYoBBS/2.35.2',
+        'Cookie': cookie,
+        'x-rpc-device_id': random_hex(32),
+        'Origin': 'https://webstatic.mihoyo.com',
+        'X_Requested_With': 'com.mihoyo.hyperion',
+        'DS': get_old_version_ds(mhy_bbs=True),
+        'x-rpc-client_type': '5',
+        'Referer': 'https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id'
+                   '=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon',
+        'x-rpc-app_version': '2.35.2',
+    }
+    if extra_headers:
+        header.update(extra_headers)
+    return header
+
+
 async def get_cookie(
         user_id: str, check: bool = True, own: bool = False
 ) -> Union[None, PrivateCookie]:
@@ -174,36 +244,40 @@ async def get_cookie(
         :param own: 是否只获取和uid对应的cookie
     """
     if check:
-        status = 'status=1'
+        status_1 = 1
+        status_2 = 1
     else:
-        status = 'status=1 OR status=0'
+        status_1 = 1
+        status_2 = 0
     if own:
-        select_query = "SELECT * FROM private_cookies WHERE user_id = ? AND ?"
-        cookie_tuple_list = await async_db.fetch(select_query, (user_id, status,))
+        select_query = "SELECT * FROM private_cookies WHERE user_id = ? AND (status = ? OR status = ?)"
+        cookie_tuple_list = await async_db.fetch(select_query, (user_id, status_1, status_2,))
     else:
-        select_query = "SELECT * FROM private_cookies WHERE ?"
-        cookie_tuple_list = await async_db.fetch(select_query, (status,))
+        select_query = "SELECT * FROM private_cookies WHERE status = ? OR status = ?"
+        cookie_tuple_list = await async_db.fetch(select_query, (status_1, status_2,))
+    logger.debug(f"cookie的信息为：{cookie_tuple_list}")
     if cookie_tuple_list:
         attributes = ['user_id', 'uid', 'mys_id', 'cookie', 'stoken', 'status']
         cookie_tuple = random.choice(cookie_tuple_list)  # 随机取一条Cookie
         cookie_dict = dict(zip(attributes, cookie_tuple))
-        private_cookie = function.yuanshen.database.cookie.PrivateCookie(**cookie_dict)
+        private_cookie = PrivateCookie(**cookie_dict)
         return private_cookie
     else:
         return None
 
 
 async def get_mihoyo_private_data(
-        uid: str,
         user_id: Optional[str],
         mode: Literal['role_skill', 'month_info', 'daily_note', 'sign_info', 'sign_action'],
         role_id: Optional[str] = None,
         month: Optional[str] = None,
 ):
-    server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     cookie_info = await get_cookie(user_id, True, True)
     if not cookie_info:
-        return f'你还没有绑定原神账号！请先进行绑定~'
+        logger.debug(f'你还没有绑定原神账号！请发送【{robot_name}原神绑定】进行绑定~')
+        return f'你还没有绑定原神账号！请发送【{robot_name}原神绑定】进行绑定~', None
+    uid = cookie_info.uid
+    server_id = 'cn_qd01' if uid[0] == '5' else 'cn_gf01'
     if mode == 'role_skill':
         data = await aiorequests.get(
             url=CHARACTER_SKILL_API,
@@ -255,6 +329,6 @@ async def get_mihoyo_private_data(
     data = data.json() if data else {'retcode': 999}
     logger.debug(data)
     if await check_retcode(data, cookie_info, user_id, uid):
-        return data
+        return data, cookie_info.uid
     else:
-        return f'你的UID{uid}的cookie疑似失效了'
+        return f'你的UID{uid}的cookie疑似失效了', None

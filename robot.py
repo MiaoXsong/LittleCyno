@@ -67,22 +67,21 @@ class Robot(Job):
         if str(yuanshen).lower() == 'on':
             self.logger.info(f"正在加载原神功能")
             from function import yuanshen
+            """原神扫码绑定"""
             self.function_dict["原神绑定"] = partial(
                 yuanshen.generateLoginData,
                 func_send_text_msg=self.sendTextMsg,
-                func_send_img_msg=self.wcf.send_image,
-                robot_name=self.robot_name)
+                func_send_img_msg=self.wcf.send_image)
             # 每10秒去查询一次米有社二维码登陆信息
             self.onEverySeconds(10, yuanshen.checkQrcode, func_send_text_msg=self.sendTextMsg)
-
+            """原神米游社签到"""
             self.function_dict["原神定时签到开启"] = partial(
-                yuanshen.onSign,
-                func_send_text_msg=self.sendTextMsg,
-                robot_name=self.robot_name)
+                yuanshen.onSign, func_send_text_msg=self.sendTextMsg)
             self.function_dict["原神定时签到关闭"] = partial(
-                yuanshen.offSign,
-                func_send_text_msg=self.sendTextMsg,
-                robot_name=self.robot_name)
+                yuanshen.offSign, func_send_text_msg=self.sendTextMsg)
+            self.function_dict["原神签到"] = partial(
+                yuanshen.mhyBbsSign, func_send_text_msg=self.sendTextMsg
+            )
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息

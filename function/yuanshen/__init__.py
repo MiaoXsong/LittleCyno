@@ -1,5 +1,5 @@
 from function.yuanshen.function.bind_cookie.func_get_cookie import initCookieTable, checkQrcode, generateLoginData
-from function.yuanshen.function.auto_bbs.func_auto_bbs import initSignUserTable, onSign, offSign
+from function.yuanshen.function.auto_bbs.func_auto_bbs import initSignUserTable, onSign, offSign, mhyBbsSign
 
 """初始化cookie相关表"""
 initCookieTable()
