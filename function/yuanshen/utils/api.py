@@ -71,6 +71,16 @@ def get_old_version_ds(mhy_bbs: bool = False) -> str:
     return f"{t},{r},{c}"
 
 
+def random_text(length: int) -> str:
+    """
+    生成指定长度的随机字符串
+
+    :param length: 长度
+    :return: 随机字符串
+    """
+    return ''.join(random.sample(string.ascii_lowercase + string.digits, length))
+
+
 def get_ds(q: str = '', b: dict = None, mhy_bbs_sign: bool = False) -> str:
     """
     生成米游社headers的ds_token

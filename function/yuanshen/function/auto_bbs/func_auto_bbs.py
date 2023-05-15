@@ -4,6 +4,7 @@ from typing import Callable
 from wcferry import WxMsg
 
 from function.yuanshen.function.auto_bbs.sign_handle import init_db, on_sign, off_sign, mhy_bbs_sign
+from function.yuanshen.function.auto_bbs.coin_handle import mhy_bbs_coin
 
 
 def initSignUserTable() -> None:
@@ -43,5 +44,18 @@ def mhyBbsSign(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) 
     :param msg: 微信消息结构体
     :return: None
     """
+    func_send_text_msg(f'执行米有社原神签到中~\n请耐心等待反馈，勿重复执行！', msg.roomid, msg.sender)
     _, send_msg = asyncio.run(mhy_bbs_sign(msg.sender))
+    func_send_text_msg(send_msg, msg.roomid, msg.sender)
+
+
+def mhyBbsCoin(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> None:
+    """
+    米游社手动获取米游币
+    :param func_send_text_msg: 文本发送消息方法
+    :param msg: 微信消息结构体
+    :return: None
+    """
+    func_send_text_msg(f'米游币获取中~\n请耐心等待反馈，请勿重复执行！', msg.roomid, msg.sender)
+    send_msg = asyncio.run(mhy_bbs_coin(msg.sender))
     func_send_text_msg(send_msg, msg.roomid, msg.sender)
