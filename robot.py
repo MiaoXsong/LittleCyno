@@ -93,7 +93,7 @@ class Robot(Job):
                 yuanshen.offCoin, func_send_text_msg=self.sendTextMsg
             )
             # 每天早上9点执行米游币获取
-            self.onEveryTime("22:36", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
+            self.onEveryTime("09:00", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
