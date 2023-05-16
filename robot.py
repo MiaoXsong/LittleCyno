@@ -83,7 +83,7 @@ class Robot(Job):
                 yuanshen.mhyBbsSign, func_send_text_msg=self.sendTextMsg
             )
             """米游币获取"""
-            self.function_dict["米游币获取"] = partial(
+            self.function_dict["米游币"] = partial(
                 yuanshen.mhyBbsCoin, func_send_text_msg=self.sendTextMsg
             )
 
