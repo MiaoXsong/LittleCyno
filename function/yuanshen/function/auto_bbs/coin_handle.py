@@ -1,15 +1,23 @@
 import asyncio
 import random
-from typing import Tuple
+import time
+from typing import Tuple, Callable
 
+from database.async_sqlite import AsyncSQLite
 from function.yuanshen.utils.api import get_cookie, get_ds, get_old_version_ds, random_hex, random_text
 from function.yuanshen.utils.requests import aiorequests
+from function.yuanshen.database.mys import MihoyoBBSSub
+from collections import defaultdict
+from database import cache
 
 from logger.logger_object import yuanshen_logger
 from configuration import Config
 
 logger = yuanshen_logger
 robot_name = Config().ROBOT_NAME
+
+db_name = 'YuanShen.db'
+async_db = AsyncSQLite(db_name)
 
 # 米游社的API列表
 bbs_Cookieurl = 'https://webapi.account.mihoyo.com/Api/cookie_accountinfo_by_loginticket?login_ticket={}'
@@ -65,6 +73,48 @@ mihoyo_bbs_List = [
         'url': 'https://bbs.mihoyo.com/zzz/'
     }
 ]
+
+
+async def init_auto_coin() -> None:
+    """
+    创建米游币订阅表
+    """
+    create_auto_coin_table_query = """
+            CREATE TABLE IF NOT EXISTS auto_coin (
+                user_id TEXT PRIMARY KEY,
+                group_id TEXT
+            );
+        """
+    creat_query = create_auto_coin_table_query
+    await async_db.execute(creat_query)
+
+
+async def on_coin(user_id: str, group_id: str) -> str:
+    cookie = await get_cookie(user_id, True, True)
+    if not cookie:
+        return f'你还没有绑定原神账号！请发送【{robot_name}原神绑定】进行绑定~'
+    elif cookie.stoken is None:
+        return f'你绑定Cookie中没有login_ticket，请重新发送用【{robot_name}原神绑定】进行绑定~'
+    insert_query = 'INSERT OR REPLACE INTO auto_coin(user_id, group_id) VALUES (?, ?)'
+    await async_db.execute(insert_query, (user_id, group_id,))
+    return f'你已成功(更新)订阅米游币获取功能~\n' \
+           f'将在每天上午9点自动执行，执行结果将在执行完毕后统一发送！'
+
+
+async def off_coin(user_id: str) -> str:
+    cookie = await get_cookie(user_id, True, True)
+    if not cookie:
+        return f'你还没有绑定原神账号！请发送【{robot_name}原神绑定】进行绑定~'
+    elif cookie.stoken is None:
+        return f'你绑定Cookie中没有login_ticket，请重新发送用【{robot_name}原神绑定】进行绑定~'
+    select_query = 'SELECT user_id FROM auto_coin WHERE user_id = ?'
+    if not await async_db.fetch(select_query, (user_id,)):
+        return f'你还没有订阅米游币获取功能!\n' \
+               f'请先发送【{robot_name}订阅米游币】进行订阅~'
+    delete_query = 'DELETE FROM auto_coin WHERE user_id = ?'
+    await async_db.execute(delete_query, (user_id,))
+    return f'你已取消米游币获取功能订阅~\n' \
+           f'如需使用，依旧可以发送【{robot_name}米游币】进行手动获取'
 
 
 class MihoyoBBSCoin:
@@ -299,3 +349,48 @@ async def mhy_bbs_coin(user_id: str) -> str:
     get_coin_task = MihoyoBBSCoin(cookie.stoken)
     result, msg = await get_coin_task.run()
     return msg if result else f'UID:{uid}{msg}'
+
+
+async def bbs_auto_coin(send_txt_msg: Callable[[str, str], None]):
+    """
+    指定时间，执行所有米游币获取订阅任务， 并将结果分群绘图发送
+    """
+    subs = []
+    t = time.time()
+    select_sql = """SELECT a.user_id, b.uid, a.group_id FROM auto_coin AS a
+                    INNER JOIN private_cookies AS b ON a.user_id = b.user_id
+    """
+    auto_coin_tuple_list = await async_db.fetch(select_sql)
+    attributes = ['user_id', 'uid', 'group_id']
+    for auto_coin_tuple in auto_coin_tuple_list:
+        auto_coin_dict = dict(zip(attributes, auto_coin_tuple))
+        sub = MihoyoBBSSub(**auto_coin_dict)
+        subs.append(sub)
+    if not subs:
+        logger.info(f'没有用户订阅米游币获取功能，跳过')
+        return
+    logger.info(f'米游币自动获取开始执行米游币自动获取，共{len(subs)}个任务，预计花费{round(100 * len(subs) / 60, 2)}分钟')
+    coin_result_group = defaultdict(list)
+    for sub in subs:
+        if await cache.get(f'{sub.user_id}_get_myb'):    # 如果该用户正在手动执行中
+            continue   # 直接跳过
+        await cache.set(key=f'{sub.user_id}_get_myb', value='1', ttl=180)  # 设置一个三分钟的缓存，防止用户手动执行
+        result = await mhy_bbs_coin(str(sub.user_id))
+        coin_result_group[sub.group_id].append({
+            'user_id': sub.user_id,
+            'uid': sub.uid,
+            'result': '出错' not in result and 'Cookie' not in result
+        })
+        await cache.delete(f'{sub.user_id}_get_myb')  # 执行后把缓存删掉
+        await asyncio.sleep(random.randint(15, 25))
+
+    for group_id, result_list in coin_result_group.items():
+        result_num = len(result_list)
+        if result_fail := len([result for result in result_list if not result['result']]):
+            fails = '\n'.join(result['uid'] for result in result_list if not result['result'])
+            msg = f'本群米游币自动获取共{result_num}个任务，其中成功{result_num - result_fail}个，失败{result_fail}个，失败的UID列表：\n{fails}'
+        else:
+            msg = f'本群米游币自动获取共{result_num}个任务，已全部完成'
+        await asyncio.sleep(random.randint(3, 6))
+        send_txt_msg(msg, group_id)
+    logger.info(f'米游币自动获取完成，共花费{round((time.time() - t) / 60, 2)}分钟')

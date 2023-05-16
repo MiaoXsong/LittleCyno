@@ -74,18 +74,26 @@ class Robot(Job):
                 func_send_img_msg=self.wcf.send_image)
             # 每10秒去查询一次米有社二维码登陆信息
             self.onEverySeconds(10, yuanshen.checkQrcode, func_send_text_msg=self.sendTextMsg)
-            """原神米游社签到"""
+            """原神米游社签到（签到强制验证码用不了咯）"""
             # self.function_dict["原神定时签到开启"] = partial(
             #     yuanshen.onSign, func_send_text_msg=self.sendTextMsg)
             # self.function_dict["原神定时签到关闭"] = partial(
             #     yuanshen.offSign, func_send_text_msg=self.sendTextMsg)
-            self.function_dict["原神签到"] = partial(
-                yuanshen.mhyBbsSign, func_send_text_msg=self.sendTextMsg
-            )
+            # self.function_dict["原神签到"] = partial(
+            #     yuanshen.mhyBbsSign, func_send_text_msg=self.sendTextMsg
+            # )
             """米游币获取"""
             self.function_dict["米游币"] = partial(
                 yuanshen.mhyBbsCoin, func_send_text_msg=self.sendTextMsg
             )
+            self.function_dict["米游币订阅"] = partial(
+                yuanshen.onCoin, func_send_text_msg=self.sendTextMsg
+            )
+            self.function_dict["米游币取消"] = partial(
+                yuanshen.offCoin, func_send_text_msg=self.sendTextMsg
+            )
+            # 每天早上9点执行米游币获取
+            self.onEveryTime("22:36", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
