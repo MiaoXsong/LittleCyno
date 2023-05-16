@@ -13,3 +13,4 @@ tqdm==4.65.0
 qrcode==7.4.2
 schedule==1.2.0
 PyYAML==6.0
+aiocache==0.12.1
