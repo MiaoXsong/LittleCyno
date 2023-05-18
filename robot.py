@@ -117,7 +117,7 @@ class Robot(Job):
             if msg.roomid not in self.groups:  # 不在配置的响应的群列表里，忽略
                 return
 
-            if str(msg.content).startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
+            if str(msg.content).strip().startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
                 function_key = str(msg.content).split(self.robot_name)[-1]
                 self.logger.debug(f"获取到的功能关键字为：{function_key}")
                 if function_key in self.function_dict:
