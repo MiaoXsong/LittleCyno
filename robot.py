@@ -100,6 +100,7 @@ class Robot(Job):
             self.onEveryTime("09:00", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
             """吃什么喝什么"""
             if str(eatdrink).lower() == 'on':
+                self.logger.info(f"正在加载吃什么喝什么功能")
                 from function import eatdrink
                 self.eat_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?吃(点|点儿)?(什么|啥)?.*"
                 self.drink_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?喝(点|点儿)?(什么|啥)?.*"
