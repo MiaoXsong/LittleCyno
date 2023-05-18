@@ -15,6 +15,8 @@ function:   # 功能开关，`ON`:开, `OFF`:关
     switch: 'OFF'
   yuanshen: # 原神功能
     switch: 'ON'
+  eatdrink: # 吃什么喝什么
+    switch: 'ON'
 
 showapi:    # https://www.showapi.com/ 星座运势功能必填，注册后每天免费50次的API的调用
   appid:

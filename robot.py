@@ -19,6 +19,9 @@ class Robot(Job):
     """
 
     def __init__(self, config: Config, wcf: Wcf) -> None:
+        self.eat_what = ''
+        self.drink_what = ''
+
         self.logger = robot_logger
         self.function_dict = {}
         self.wcf = wcf
@@ -47,6 +50,7 @@ class Robot(Job):
         chouqian = self.config.CHOU_QIAN
         xingzuo = self.config.XING_ZUO
         yuanshen = self.config.YUAN_SHEN
+        eatdrink = self.config.EATDRINK
         self.logger.debug(f"抽签开关：{chouqian}")
 
         if str(chouqian).lower() == 'on':
@@ -94,6 +98,19 @@ class Robot(Job):
             )
             # 每天早上9点执行米游币获取
             self.onEveryTime("09:00", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
+            """吃什么喝什么"""
+            if str(eatdrink).lower() == 'on':
+                from function import eatdrink
+                self.eat_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?吃(点|点儿)?(什么|啥)?.*"
+                self.drink_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?喝(点|点儿)?(什么|啥)?.*"
+                self.function_dict["吃什么"] = partial(
+                    eatdrink.what_to_eat,
+                    func_send_text_msg=self.sendTextMsg,
+                    func_send_img_msg=self.wcf.send_image)
+                self.function_dict["喝什么"] = partial(
+                    eatdrink.what_to_drink,
+                    func_send_text_msg=self.sendTextMsg,
+                    func_send_img_msg=self.wcf.send_image)
 
     def toAt(self, msg: WxMsg) -> bool:
         """处理被 @ 消息
@@ -124,6 +141,15 @@ class Robot(Job):
                     self.logger.debug(f"进入到了功能函数：{function_key}")
                     handler = self.function_dict.get(function_key)
                     handler(msg=msg)
+                elif self.eat_what or self.drink_what:
+                    if re.match(self.eat_what, function_key):
+                        self.logger.debug(f"进入到了功能函数：吃什么")
+                        handler = self.function_dict.get("吃什么")
+                        handler(msg=msg)
+                    elif re.match(self.drink_what, function_key):
+                        self.logger.debug(f"进入到了功能函数：喝什么")
+                        handler = self.function_dict.get("喝什么")
+                        handler(msg=msg)
 
                 return
 

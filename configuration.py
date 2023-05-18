@@ -36,6 +36,7 @@ class Config(object):
         self.CHOU_QIAN = yconfig["function"]["chouqian"]["switch"]
         self.XING_ZUO = yconfig["function"]["xingzuo"]["switch"]
         self.YUAN_SHEN = yconfig["function"]["yuanshen"]["switch"]
+        self.EATDRINK = yconfig["function"]["eatdrink"]["switch"]
         """show_api"""
         self.SHOWAPI_ID = yconfig["showapi"]["appid"]
         self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
