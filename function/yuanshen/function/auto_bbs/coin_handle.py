@@ -1,7 +1,7 @@
 import asyncio
 import random
 import time
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Union
 
 from database.async_sqlite import AsyncSQLite
 from function.yuanshen.utils.api import get_cookie, get_ds, get_old_version_ds, random_hex, random_text
@@ -351,7 +351,7 @@ async def mhy_bbs_coin(user_id: str) -> str:
     return msg if result else f'UID:{uid}{msg}'
 
 
-async def bbs_auto_coin(send_txt_msg: Callable[[str, str], None]):
+async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
     """
     指定时间，执行所有米游币获取订阅任务， 并将结果分群绘图发送
     """
@@ -391,6 +391,11 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str], None]):
             msg = f'本群米游币自动获取共{result_num}个任务，其中成功{result_num - result_fail}个，失败{result_fail}个，失败的UID列表：\n{fails}'
         else:
             msg = f'本群米游币自动获取共{result_num}个任务，已全部完成'
+        if result_num <= 8:
+            result_str = ','.join(str(result["user_id"]) for result in result_list)
+            logger.debug(f"需要艾特的用户为：{result_str}")
+            send_txt_msg(msg, group_id, result_str)
+            continue
+        send_txt_msg(msg, group_id, "")
         await asyncio.sleep(random.randint(3, 6))
-        send_txt_msg(msg, group_id)
     logger.info(f'米游币自动获取完成，共花费{round((time.time() - t) / 60, 2)}分钟')
