@@ -1,6 +1,8 @@
 import asyncio
+import math
 import random
 import time
+from datetime import datetime, timedelta
 from typing import Tuple, Callable, Union
 
 from database.async_sqlite import AsyncSQLite
@@ -12,9 +14,10 @@ from database import cache
 
 from logger.logger_object import yuanshen_logger
 from configuration import Config
-
+config = Config()
 logger = yuanshen_logger
-robot_name = Config().ROBOT_NAME
+robot_name = config.ROBOT_NAME
+myb_time = config.MYBTIME
 
 db_name = 'YuanShen.db'
 async_db = AsyncSQLite(db_name)
@@ -97,8 +100,14 @@ async def on_coin(user_id: str, group_id: str) -> str:
         return f'你绑定Cookie中没有login_ticket，请重新发送用【{robot_name}原神绑定】进行绑定~'
     insert_query = 'INSERT OR REPLACE INTO auto_coin(user_id, group_id) VALUES (?, ?)'
     await async_db.execute(insert_query, (user_id, group_id,))
-    return f'你已成功(更新)订阅米游币获取功能~\n' \
-           f'将在每天上午9点自动执行，执行结果将在执行完毕后统一发送！'
+    select_query = 'SELECT count(1) FROM auto_coin GROUP BY user_id'
+    on_coin_user_num_tuple_list = await async_db.fetch(select_query)
+    result_ceil = math.ceil(100 * int(on_coin_user_num_tuple_list[0][0]) / 60)
+    time_string = myb_time
+    start_time = datetime.strptime(time_string, "%H:%M")
+    end_time = start_time + timedelta(minutes=result_ceil)
+    return f'你已成功订阅米游币获取功能~\n' \
+           f'执行结果大约在每天{end_time.strftime("%H:%M")}发送到本群！'
 
 
 async def off_coin(user_id: str) -> str:
@@ -379,7 +388,7 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
         coin_result_group[sub.group_id].append({
             'user_id': sub.user_id,
             'uid': sub.uid,
-            'result': '出错' not in result and 'Cookie' not in result
+            'result': '出错' not in result and 'Cookie' not in result and '阻拦' not in result
         })
         await cache.delete(f'{sub.user_id}_get_myb')  # 执行后把缓存删掉
         await asyncio.sleep(random.randint(15, 25))
@@ -395,6 +404,7 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
             result_str = ','.join(str(result["user_id"]) for result in result_list)
             logger.debug(f"需要艾特的用户为：{result_str}")
             send_txt_msg(msg, group_id, result_str)
+            await asyncio.sleep(random.randint(3, 6))
             continue
         send_txt_msg(msg, group_id, "")
         await asyncio.sleep(random.randint(3, 6))

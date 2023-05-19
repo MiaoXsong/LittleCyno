@@ -40,7 +40,8 @@ class Config(object):
         """show_api"""
         self.SHOWAPI_ID = yconfig["showapi"]["appid"]
         self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
-
+        """获取米游币开始时间"""
+        self.MYBTIME = yconfig["miyoubi_start_time"]
 
 
 

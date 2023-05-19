@@ -96,8 +96,8 @@ class Robot(Job):
             self.function_dict["米游币取消"] = partial(
                 yuanshen.offCoin, func_send_text_msg=self.sendTextMsg
             )
-            # 每天早上9点执行米游币获取
-            self.onEveryTime("09:00", yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
+            # 每天xx:xx执行米游币获取（配置文件中定时间点）
+            self.onEveryTime(self.config.MYBTIME, yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
             """吃什么喝什么"""
             if str(eatdrink).lower() == 'on':
                 self.logger.info(f"正在加载吃什么喝什么功能")

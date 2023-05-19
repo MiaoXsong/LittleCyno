@@ -21,3 +21,5 @@ function:   # 功能开关，`ON`:开, `OFF`:关
 showapi:    # https://www.showapi.com/ 星座运势功能必填，注册后每天免费50次的API的调用
   appid:
   appsecret:
+
+miyoubi_start_time: "09:00"     # 每天自动获取米游币的开始时间
