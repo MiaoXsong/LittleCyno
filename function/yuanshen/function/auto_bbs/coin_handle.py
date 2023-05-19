@@ -100,7 +100,7 @@ async def on_coin(user_id: str, group_id: str) -> str:
         return f'你绑定Cookie中没有login_ticket，请重新发送用【{robot_name}原神绑定】进行绑定~'
     insert_query = 'INSERT OR REPLACE INTO auto_coin(user_id, group_id) VALUES (?, ?)'
     await async_db.execute(insert_query, (user_id, group_id,))
-    select_query = 'SELECT count(1) FROM auto_coin GROUP BY user_id'
+    select_query = 'SELECT count(1) FROM auto_coin'
     on_coin_user_num_tuple_list = await async_db.fetch(select_query)
     result_ceil = math.ceil(100 * int(on_coin_user_num_tuple_list[0][0]) / 60)
     time_string = myb_time
