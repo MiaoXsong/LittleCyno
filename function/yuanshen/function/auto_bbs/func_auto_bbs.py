@@ -77,10 +77,10 @@ def mhyBbsSign(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) 
     :param msg: 微信消息结构体
     :return: None
     """
-    if asyncio.run(cache.get(f'{msg.sender}_ys_sign')):  # 如果有缓存则提示等待
+    if asyncio.run(cache.get(f'{msg.sender}_ys_sign', ttl=180)):  # 如果有缓存则提示等待(TTL=180)
         func_send_text_msg(f'执行米有社原神签到中~\n请耐心等待反馈或3分钟后重试！', msg.roomid, msg.sender)
         return
-    asyncio.run(cache.set(key=f'{msg.sender}_ys_sign', value='1', ttl=180))  # 设置一个三分钟的缓存
+    asyncio.run(cache.set(key=f'{msg.sender}_ys_sign', value='1'))  # 设置一个缓存
     _, send_msg = asyncio.run(mhy_bbs_sign(msg.sender))
     asyncio.run(cache.delete(f'{msg.sender}_ys_sign'))  # 执行后把缓存删掉
     func_send_text_msg(send_msg, msg.roomid, msg.sender)
@@ -93,10 +93,10 @@ def mhyBbsCoin(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) 
     :param msg: 微信消息结构体
     :return: None
     """
-    if asyncio.run(cache.get(f'{msg.sender}_get_myb')):  # 如果有缓存则提示等待
+    if asyncio.run(cache.get(f'{msg.sender}_get_myb', ttl=180)):  # 如果有缓存则提示等待(TTL=180)
         func_send_text_msg(f'米游币获取中~\n请耐心等待反馈或3分钟后重试！', msg.roomid, msg.sender)
         return
-    asyncio.run(cache.set(key=f'{msg.sender}_get_myb', value='1', ttl=180))  # 设置一个三分钟的缓存
+    asyncio.run(cache.set(key=f'{msg.sender}_get_myb', value='1'))  # 设置一个缓存缓存
     send_msg = asyncio.run(mhy_bbs_coin(msg.sender))
     asyncio.run(cache.delete(f'{msg.sender}_get_myb'))  # 执行后把缓存删掉
     func_send_text_msg(send_msg, msg.roomid, msg.sender)

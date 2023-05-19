@@ -381,9 +381,9 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
     logger.info(f'米游币自动获取开始执行米游币自动获取，共{len(subs)}个任务，预计花费{round(100 * len(subs) / 60, 2)}分钟')
     coin_result_group = defaultdict(list)
     for sub in subs:
-        if await cache.get(f'{sub.user_id}_get_myb'):    # 如果该用户正在手动执行中
+        if await cache.get(f'{sub.user_id}_get_myb', ttl=180):    # 如果该用户正在手动执行中
             continue   # 直接跳过
-        await cache.set(key=f'{sub.user_id}_get_myb', value='1', ttl=180)  # 设置一个三分钟的缓存，防止用户手动执行
+        await cache.set(key=f'{sub.user_id}_get_myb', value='1')  # 设置一个缓存防止用户手动执行
         result = await mhy_bbs_coin(str(sub.user_id))
         coin_result_group[sub.group_id].append({
             'user_id': sub.user_id,

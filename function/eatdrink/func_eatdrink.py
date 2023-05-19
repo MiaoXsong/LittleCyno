@@ -48,16 +48,16 @@ def what_to_eat(func_send_text_msg: Callable[[str, str, str], None],
                 msg: WxMsg) -> None:
     send_img = ''
     eat = random.choice(all_file_eat_name)
-    cache_value = asyncio.run(cache.get(f'{msg.sender}_eat'))
+    cache_value = asyncio.run(cache.get(f'{msg.sender}_eat', ttl=3600))
     if cache_value:
         if cache_value == 1:
-            asyncio.run(cache.set(key=f'{msg.sender}_eat', value=2, ttl=3600))  # 更新缓存
+            asyncio.run(cache.set(key=f'{msg.sender}_eat', value=2))  # 更新缓存
             send_msg = f"{robot_name}感觉你还是吃【{str(eat).split('.')[0]}】比较好"
             send_img = img_eat_path / eat
         else:
             send_msg = random.choice(max_eat_msg)
     else:
-        asyncio.run(cache.set(key=f'{msg.sender}_eat', value=1, ttl=3600))  # 设置缓存
+        asyncio.run(cache.set(key=f'{msg.sender}_eat', value=1))  # 设置缓存
         send_msg = f"{robot_name}建议你吃【{str(eat).split('.')[0]}】"
         send_img = img_eat_path / eat
 
@@ -71,16 +71,16 @@ def what_to_drink(func_send_text_msg: Callable[[str, str, str], None],
                   msg: WxMsg) -> None:
     send_img = ''
     drink = random.choice(all_file_drink_name)
-    cache_value = asyncio.run(cache.get(f'{msg.sender}_drink'))
+    cache_value = asyncio.run(cache.get(f'{msg.sender}_drink', ttl=3600))
     if cache_value:
         if cache_value == 1:
-            asyncio.run(cache.set(key=f'{msg.sender}_drink', value=2, ttl=3600))  # 更新缓存
+            asyncio.run(cache.set(key=f'{msg.sender}_drink', value=2))  # 更新缓存
             send_msg = f"{robot_name}感觉你还是喝【{str(drink).split('.')[0]}】比较好"
             send_img = img_drink_path / drink
         else:
             send_msg = random.choice(max_drink_msg)
     else:
-        asyncio.run(cache.set(key=f'{msg.sender}_drink', value=1, ttl=3600))  # 设置缓存
+        asyncio.run(cache.set(key=f'{msg.sender}_drink', value=1))  # 设置缓存
         send_msg = f"{robot_name}建议你喝【{str(drink).split('.')[0]}】"
         send_img = img_drink_path / drink
 
