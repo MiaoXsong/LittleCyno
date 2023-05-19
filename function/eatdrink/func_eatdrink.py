@@ -28,7 +28,7 @@ all_file_drink_name = os.listdir(str(img_drink_path))
 # 上限回复消息
 max_eat_msg = (
     "你今天吃的够多了！不许再吃了(´-ωก`)",
-    "吃吃吃，就知道吃，你都吃饱了！去运动一小时后再来(▼皿▼#)",
+    "吃吃吃，就知道吃，你都吃饱了！去运动一会儿再来(▼皿▼#)",
     "(*｀へ´*)你猜我会不会再给你发好吃的图片",
     f"没得吃的了，{robot_name}的食物都被你这坏蛋吃光了！",
     "你在等我给你发好吃的？做梦哦！你都吃那么多了，不许再吃了！ヽ(≧Д≦)ノ"
@@ -36,7 +36,7 @@ max_eat_msg = (
 
 max_drink_msg = (
     "你今天喝的够多了！不许再喝了(´-ωก`)",
-    "喝喝喝，就知道喝，你都喝胖了！去运动一小时后再来(▼皿▼#)",
+    "喝喝喝，就知道喝，你都喝胖了！去运动一会儿再来(▼皿▼#)",
     "(*｀へ´*)你猜我会不会再给你发好喝的图片",
     f"没得喝的了，{robot_name}的饮品都被你这坏蛋喝光了！",
     "你在等我给你发好喝的？做梦哦！你都喝那么多了，不许再喝了！ヽ(≧Д≦)ノ"
@@ -48,7 +48,7 @@ def what_to_eat(func_send_text_msg: Callable[[str, str, str], None],
                 msg: WxMsg) -> None:
     send_img = ''
     eat = random.choice(all_file_eat_name)
-    cache_value = asyncio.run(cache.get(f'{msg.sender}_eat', ttl=3600))
+    cache_value = asyncio.run(cache.get(f'{msg.sender}_eat', ttl=600))
     if cache_value:
         if cache_value == 1:
             asyncio.run(cache.set(key=f'{msg.sender}_eat', value=2))  # 更新缓存
@@ -71,7 +71,7 @@ def what_to_drink(func_send_text_msg: Callable[[str, str, str], None],
                   msg: WxMsg) -> None:
     send_img = ''
     drink = random.choice(all_file_drink_name)
-    cache_value = asyncio.run(cache.get(f'{msg.sender}_drink', ttl=3600))
+    cache_value = asyncio.run(cache.get(f'{msg.sender}_drink', ttl=600))
     if cache_value:
         if cache_value == 1:
             asyncio.run(cache.set(key=f'{msg.sender}_drink', value=2))  # 更新缓存
