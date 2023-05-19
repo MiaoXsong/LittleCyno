@@ -2,9 +2,8 @@ import aiocache
 
 
 class Cache:
-    def __init__(self, serializer=aiocache.serializers.PickleSerializer()):
+    def __init__(self):
         self.cache = aiocache.Cache(aiocache.SimpleMemoryCache)
-        self.serializer = serializer
 
     async def set(self, key, value, ttl=None):
         """
@@ -12,14 +11,13 @@ class Cache:
 
         如果ttl为None，则键值对将永久存储在缓存中（直到缓存被清除或内存不足）。
         """
-        await self.cache.set(key, self.serializer.dumps(value), ttl=ttl)
+        await self.cache.set(key, value, ttl=ttl)
 
     async def get(self, key):
         """
-        从缓存中获取与给定键相关联的值。如果键不存在，则返回None。
+        从缓存中获取键值对，如果键不存在则返回None。
         """
-        result = await self.cache.get(key)
-        return self.serializer.loads(result) if result else None
+        return await self.cache.get(key)
 
     async def delete(self, key):
         """
