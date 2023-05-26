@@ -157,7 +157,7 @@ async def generate_login_data(send_text_msg: Callable[[str, str, str], None],
     img_b64 = generate_qrcode(login_data['url'])
     running_login_data[str(user_id)]['img_b64'] = img_b64
     running_login_data[str(user_id)]['group_id'] = group_id
-    send_msg = f'请在3分钟内使用【米游社】扫码并确认进行绑定(可以)~\n' \
+    send_msg = f'请在3分钟内使用【米游社】扫码并确认进行绑定~\n' \
                f'1.扫码即代表你同意将Cookie信息授权给【{robot_name}】\n' \
                f'2.扫码时会提示登录原神，实际不会上游戏，更不会把你游戏顶掉！\n' \
                f'3.其他人请不要乱扫，否则会将你的账号绑到TA身上！'
