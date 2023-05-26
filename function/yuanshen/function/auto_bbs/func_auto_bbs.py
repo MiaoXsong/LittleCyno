@@ -2,6 +2,7 @@ import asyncio
 from typing import Callable
 
 from wcferry import WxMsg
+from configuration import Config
 
 from function.yuanshen.function.auto_bbs.sign_handle import init_db, on_sign, off_sign, mhy_bbs_sign
 from function.yuanshen.function.auto_bbs.coin_handle import mhy_bbs_coin, on_coin, off_coin, bbs_auto_coin, \
@@ -9,6 +10,7 @@ from function.yuanshen.function.auto_bbs.coin_handle import mhy_bbs_coin, on_coi
 
 from database import cache
 
+robot_name = Config().ROBOT_NAME
 
 def initSignUserTable() -> None:
     """
@@ -99,8 +101,8 @@ def mhyBbsCoin(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) 
     asyncio.run(cache.set(key=f'{msg.sender}_get_myb', value='1'))  # 设置一个缓存缓存
     send_msg = asyncio.run(mhy_bbs_coin(msg.sender))
     asyncio.run(cache.delete(f'{msg.sender}_get_myb'))  # 执行后把缓存删掉
-    send_msg = f'{send_msg}\n' \
-               f'未开启订阅的小伙伴可以发送【喵弟米游币订阅】开启\n' \
+    send_msg = f'{send_msg}\n\n' \
+               f'未开启订阅的小伙伴可以发送【{robot_name}米游币订阅】开启\n' \
                f'开启后将每天自动执行获取米游币的任务'
     func_send_text_msg(send_msg, msg.roomid, msg.sender)
 
