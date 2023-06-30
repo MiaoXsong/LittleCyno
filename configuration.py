@@ -42,6 +42,9 @@ class Config(object):
         self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
         """获取米游币开始时间"""
         self.MYBTIME = yconfig["miyoubi_start_time"]
+        """60秒看世界"""
+        self.NEWS_60S = yconfig["function"]["news_60s"]["switch"]
+        self.NEWS_60STIME = yconfig["news_60s_start_time"]
 
 
 

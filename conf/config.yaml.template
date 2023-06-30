@@ -1,5 +1,5 @@
 logger:
-  logger_level: 'DEBUG' # 日志级别(DEBUG、INFO、WARNING、ERROR、CRITICAL)
+  logger_level: 'INFO' # 日志级别(DEBUG、INFO、WARNING、ERROR、CRITICAL)
   logger_max_bytes: 10485760  # 存储单个文件最大的大小，默认10M
   logger_backup_count: 20   #存储日志个数
 
@@ -17,9 +17,12 @@ function:   # 功能开关，`ON`:开, `OFF`:关
     switch: 'ON'
   eatdrink: # 吃什么喝什么
     switch: 'ON'
+  news_60s: # 60秒看世界
+    switch: 'ON'
 
 showapi:    # https://www.showapi.com/ 星座运势功能必填，注册后每天免费50次的API的调用
   appid:
   appsecret:
 
 miyoubi_start_time: "09:00"     # 每天自动获取米游币的开始时间
+news_60s_start_time: "08:00"    # 每天60秒看世界开始时间

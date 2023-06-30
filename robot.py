@@ -51,6 +51,7 @@ class Robot(Job):
         xingzuo = self.config.XING_ZUO
         yuanshen = self.config.YUAN_SHEN
         eatdrink = self.config.EATDRINK
+        news_60s = self.config.NEWS_60S
         self.logger.debug(f"抽签开关：{chouqian}")
 
         if str(chouqian).lower() == 'on':
@@ -98,6 +99,14 @@ class Robot(Job):
             )
             # 每天xx:xx执行米游币获取（配置文件中定时间点）
             self.onEveryTime(self.config.MYBTIME, yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
+            """60秒看世界"""
+            if str(news_60s).lower() == 'on':
+                self.logger.info(f"正在加载60秒看世界功能")
+                from function import news60s
+                # 每天xx:xx执行60秒看世界（配置文件中定时间点）
+                self.onEveryTime(self.config.NEWS_60STIME, news60s.sendNews,
+                                 func_send_img_msg=self.wcf.send_image,
+                                 func_send_text_msg=self.sendTextMsg)
             """吃什么喝什么"""
             if str(eatdrink).lower() == 'on':
                 self.logger.info(f"正在加载吃什么喝什么功能")
