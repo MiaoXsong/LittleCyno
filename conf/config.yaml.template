@@ -19,10 +19,19 @@ function:   # 功能开关，`ON`:开, `OFF`:关
     switch: 'ON'
   news_60s: # 60秒看世界
     switch: 'ON'
+  chat_gpt: # openai-chatgpt3.5
+    switch: 'OFF'
 
 showapi:    # https://www.showapi.com/ 星座运势功能必填，注册后每天免费50次的API的调用
   appid:
   appsecret:
+
+chat_gpt:
+  key: 填写你 ChatGPT 的 key
+  api: https://api.openai.com/v1 # 如果你不知道这是干嘛的，就不要改
+  proxy: # 如果你在国内，你可能需要魔法，大概长这样：http://域名或者IP地址:端口号
+  contexts: 10   # 每个微信号存储的上下文上限，超过上限滚动删除
+
 
 miyoubi_start_time: "09:00"     # 每天自动获取米游币的开始时间
 news_60s_start_time: "08:00"    # 每天60秒看世界开始时间

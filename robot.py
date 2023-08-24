@@ -52,8 +52,8 @@ class Robot(Job):
         yuanshen = self.config.YUAN_SHEN
         eatdrink = self.config.EATDRINK
         news_60s = self.config.NEWS_60S
+        chat_gpt = self.config.CHAT_GPT
         self.logger.debug(f"抽签开关：{chouqian}")
-
         if str(chouqian).lower() == 'on':
             self.logger.info(f"正在加载抽签功能")
             from function import chouqian
@@ -121,13 +121,20 @@ class Robot(Job):
                     eatdrink.what_to_drink,
                     func_send_text_msg=self.sendTextMsg,
                     func_send_img_msg=self.wcf.send_image)
-
-    def toAt(self, msg: WxMsg) -> bool:
-        """处理被 @ 消息
-        :param msg: 微信消息结构
-        :return: 处理状态，`True` 成功，`False` 失败
-        """
-        return True
+            """Chat_GPT"""
+            if str(chat_gpt).lower() == 'on':
+                self.logger.info(f"正在加载chatgpt功能")
+                from function import chatgpt
+                self.function_dict["查看上下文"] = partial(
+                    chatgpt.getContextualContent,
+                    func_send_text_msg=self.sendTextMsg)
+                self.function_dict["清除上下文"] = partial(
+                    chatgpt.delContextualContent,
+                    func_send_text_msg=self.sendTextMsg)
+                self.function_dict["**##chatgpt##**"] = partial(
+                    chatgpt.chatGpt,
+                    func_send_text_msg=self.sendTextMsg
+                )
 
     def processMsg(self, msg: WxMsg) -> None:
         """当接收到消息的时候，会调用本方法。如果不实现本方法，则打印原始消息。
@@ -164,7 +171,8 @@ class Robot(Job):
                 return
 
             if msg.is_at(self.wxid):  # 被@
-                pass
+                handler = self.function_dict.get("**##chatgpt##**")
+                handler(msg)
 
             else:  # 其他消息
                 pass

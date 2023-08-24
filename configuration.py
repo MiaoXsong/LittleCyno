@@ -37,15 +37,20 @@ class Config(object):
         self.XING_ZUO = yconfig["function"]["xingzuo"]["switch"]
         self.YUAN_SHEN = yconfig["function"]["yuanshen"]["switch"]
         self.EATDRINK = yconfig["function"]["eatdrink"]["switch"]
+        self.NEWS_60S = yconfig["function"]["news_60s"]["switch"]
+        self.CHAT_GPT = yconfig["function"]["chat_gpt"]["switch"]
         """show_api"""
         self.SHOWAPI_ID = yconfig["showapi"]["appid"]
         self.SHOWAPI_SECRET = yconfig["showapi"]["appsecret"]
         """获取米游币开始时间"""
         self.MYBTIME = yconfig["miyoubi_start_time"]
         """60秒看世界"""
-        self.NEWS_60S = yconfig["function"]["news_60s"]["switch"]
         self.NEWS_60STIME = yconfig["news_60s_start_time"]
-
+        """CHAT-GPT"""
+        self.CHATGPT_KEY = yconfig["chat_gpt"]["key"]
+        self.CHATGPT_API = yconfig["chat_gpt"]["api"]
+        self.CHATGPT_PROXY = yconfig["chat_gpt"]["proxy"]
+        self.CHATGPT_CONTEXTS = yconfig["chat_gpt"]["contexts"]
 
 
 
