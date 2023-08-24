@@ -1,6 +1,6 @@
 colorlog==6.7.0
 pyfiglet==0.8.post1
-wcferry==37.1.25.2
+wcferry>=39.0.0.1
 aiocache==0.12.1
 aiosqlite==0.19.0
 pydantic==1.10.7

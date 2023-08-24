@@ -131,10 +131,9 @@ class Robot(Job):
                 self.function_dict["清除上下文"] = partial(
                     chatgpt.delContextualContent,
                     func_send_text_msg=self.sendTextMsg)
-                self.function_dict["**##chatgpt##**"] = partial(
+                self.function_dict["**@@chatgpt@@**"] = partial(
                     chatgpt.chatGpt,
-                    func_send_text_msg=self.sendTextMsg
-                )
+                    func_send_text_msg=self.sendTextMsg)
 
     def processMsg(self, msg: WxMsg) -> None:
         """当接收到消息的时候，会调用本方法。如果不实现本方法，则打印原始消息。
@@ -171,8 +170,8 @@ class Robot(Job):
                 return
 
             if msg.is_at(self.wxid):  # 被@
-                handler = self.function_dict.get("**##chatgpt##**")
-                handler(msg)
+                handler = self.function_dict.get("**@@chatgpt@@**")
+                handler(msg=msg)
 
             else:  # 其他消息
                 pass
