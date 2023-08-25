@@ -69,6 +69,7 @@ async def get_contextual_content(wxid: str) -> str:
             if cont["role"] == "user":
                 answer = answer + f"问题{q_count}: {cont['content']}\n"
                 q_count = q_count + 1
+        answer = answer.rstrip("\n")
     else:
         answer = '你还没有问过我问题呢，来试着问问吧~'
     return answer
