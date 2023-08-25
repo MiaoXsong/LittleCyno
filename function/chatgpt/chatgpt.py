@@ -17,7 +17,7 @@ contexts = Config().CHATGPT_CONTEXTS
 conversation_list = {}
 
 
-async def get_answer(question: str, wxid: str) -> str:
+async def get_answer(question: str, wxid: str) -> [str, bool]:
     openai.api_key = key
     # 自己搭建或第三方代理的接口
     openai.api_base = api
@@ -38,18 +38,27 @@ async def get_answer(question: str, wxid: str) -> str:
         rsp = rsp[2:] if rsp.startswith("\n\n") else rsp
         rsp = rsp.replace("\n\n", "\n")
         await updateMessage(wxid, rsp, "assistant")
+        result = True
     except openai.error.AuthenticationError as e3:
-        rsp = "OpenAI API 认证失败，请检查 API 密钥是否正确"
+        rsp = "OpenAI API 认证失败！"
+        logger.error(f"OpenAI API 认证失败，请检查 API 密钥是否正确")
+        result = False
     except openai.error.APIConnectionError as e2:
-        rsp = "无法连接到 OpenAI API，请检查网络连接"
+        rsp = "无法连接到 OpenAI API，请重试！"
+        logger.error(f"无法连接到 OpenAI API，请检查网络连接")
+        result = False
     except openai.error.APIError as e1:
-        rsp = "OpenAI API 返回了错误：" + str(e1)
+        rsp = "OpenAI API 发生了错误，请重试！："
+        logger.error(f"OpenAI API 返回了错误：{str(e1)}")
+        result = False
     except Exception as e0:
-        rsp = "发生未知错误：" + str(e0)
+        rsp = "发生未知错误，请重试！"
+        logger.error(f"发生未知错误：{str(e0)}")
+        result = False
 
     # print(conversation_list[wxid])
 
-    return rsp
+    return rsp, result
 
 
 async def get_contextual_content(wxid: str) -> str:
@@ -57,8 +66,8 @@ async def get_contextual_content(wxid: str) -> str:
     if wxid in conversation_list.keys():
         answer = '你目前的上下文内容如下：\n'
         for cont in conversation_list[wxid]:
-            if cont["role"] != "system":
-                answer = answer + f"问题{q_count}: {cont['content']}"
+            if cont["role"] == "user":
+                answer = answer + f"问题{q_count}: {cont['content']}\n"
                 q_count = q_count + 1
     else:
         answer = '你还没有问过我问题呢，来试着问问吧~'

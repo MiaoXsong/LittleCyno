@@ -99,41 +99,41 @@ class Robot(Job):
             )
             # 每天xx:xx执行米游币获取（配置文件中定时间点）
             self.onEveryTime(self.config.MYBTIME, yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
-            """60秒看世界"""
-            if str(news_60s).lower() == 'on':
-                self.logger.info(f"正在加载60秒看世界功能")
-                from function import news60s
-                # 每天xx:xx执行60秒看世界（配置文件中定时间点）
-                self.onEveryTime(self.config.NEWS_60STIME, news60s.sendNews,
-                                 func_send_img_msg=self.wcf.send_image,
-                                 func_send_text_msg=self.sendTextMsg)
-            """吃什么喝什么"""
-            if str(eatdrink).lower() == 'on':
-                self.logger.info(f"正在加载吃什么喝什么功能")
-                from function import eatdrink
-                self.eat_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?吃(点|点儿)?(什么|啥)?.*"
-                self.drink_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?喝(点|点儿)?(什么|啥)?.*"
-                self.function_dict["吃什么"] = partial(
-                    eatdrink.what_to_eat,
-                    func_send_text_msg=self.sendTextMsg,
-                    func_send_img_msg=self.wcf.send_image)
-                self.function_dict["喝什么"] = partial(
-                    eatdrink.what_to_drink,
-                    func_send_text_msg=self.sendTextMsg,
-                    func_send_img_msg=self.wcf.send_image)
-            """Chat_GPT"""
-            if str(chat_gpt).lower() == 'on':
-                self.logger.info(f"正在加载chatgpt功能")
-                from function import chatgpt
-                self.function_dict["查看上下文"] = partial(
-                    chatgpt.getContextualContent,
-                    func_send_text_msg=self.sendTextMsg)
-                self.function_dict["清除上下文"] = partial(
-                    chatgpt.delContextualContent,
-                    func_send_text_msg=self.sendTextMsg)
-                self.function_dict["**@@chatgpt@@**"] = partial(
-                    chatgpt.chatGpt,
-                    func_send_text_msg=self.sendTextMsg)
+        """60秒看世界"""
+        if str(news_60s).lower() == 'on':
+            self.logger.info(f"正在加载60秒看世界功能")
+            from function import news60s
+            # 每天xx:xx执行60秒看世界（配置文件中定时间点）
+            self.onEveryTime(self.config.NEWS_60STIME, news60s.sendNews,
+                             func_send_img_msg=self.wcf.send_image,
+                             func_send_text_msg=self.sendTextMsg)
+        """吃什么喝什么"""
+        if str(eatdrink).lower() == 'on':
+            self.logger.info(f"正在加载吃什么喝什么功能")
+            from function import eatdrink
+            self.eat_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?吃(点|点儿)?(什么|啥)?.*"
+            self.drink_what = r"^(今|明|后)?(天|日)?(早|中|下|晚)?(上|午|餐|饭|夜宵|宵夜)?喝(点|点儿)?(什么|啥)?.*"
+            self.function_dict["吃什么"] = partial(
+                eatdrink.what_to_eat,
+                func_send_text_msg=self.sendTextMsg,
+                func_send_img_msg=self.wcf.send_image)
+            self.function_dict["喝什么"] = partial(
+                eatdrink.what_to_drink,
+                func_send_text_msg=self.sendTextMsg,
+                func_send_img_msg=self.wcf.send_image)
+        """Chat_GPT"""
+        if str(chat_gpt).lower() == 'on':
+            self.logger.info(f"正在加载chatgpt功能")
+            from function import chatgpt
+            self.function_dict["查看上下文"] = partial(
+                chatgpt.getContextualContent,
+                func_send_text_msg=self.sendTextMsg)
+            self.function_dict["清除上下文"] = partial(
+                chatgpt.delContextualContent,
+                func_send_text_msg=self.sendTextMsg)
+            self.function_dict["**@@chatgpt@@**"] = partial(
+                chatgpt.chatGpt,
+                func_send_text_msg=self.sendTextMsg)
 
     def processMsg(self, msg: WxMsg) -> None:
         """当接收到消息的时候，会调用本方法。如果不实现本方法，则打印原始消息。
@@ -150,28 +150,39 @@ class Robot(Job):
             if msg.roomid not in self.groups:  # 不在配置的响应的群列表里，忽略
                 return
 
-            if str(msg.content).strip().startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
-                function_key = str(msg.content).split(self.robot_name)[-1]
-                self.logger.debug(f"获取到的功能关键字为：{function_key}")
+            if str(msg.content).strip().startswith(self.robot_name) or msg.is_at(self.wxid):
+                # 如果消息以配置文件自定义的机器人名称开头 或 者被@
+                if str(msg.content).strip().startswith(self.robot_name):  # 如果消息以配置文件自定义的机器人名称开头
+                    function_key = str(msg.content).split(self.robot_name)[-1]
+                    self.logger.debug(f"获取到的功能关键字为：{function_key}")
+
+                    if self.eat_what or self.drink_what:
+                        if re.match(self.eat_what, function_key):
+                            self.logger.debug(f"进入到了功能函数：吃什么")
+                            handler = self.function_dict.get("吃什么")
+                            handler(msg=msg)
+                        elif re.match(self.drink_what, function_key):
+                            self.logger.debug(f"进入到了功能函数：喝什么")
+                            handler = self.function_dict.get("喝什么")
+                            handler(msg=msg)
+                else:
+                    q = re.sub(r"@.*?[\u2005|\s]", "", msg.content).replace(" ", "")
+                    function_key = str(q)
+                    self.logger.debug(f"获取到的功能关键字为：{function_key}")
+
                 if function_key in self.function_dict:
                     self.logger.debug(f"进入到了功能函数：{function_key}")
                     handler = self.function_dict.get(function_key)
                     handler(msg=msg)
-                elif self.eat_what or self.drink_what:
-                    if re.match(self.eat_what, function_key):
-                        self.logger.debug(f"进入到了功能函数：吃什么")
-                        handler = self.function_dict.get("吃什么")
-                        handler(msg=msg)
-                    elif re.match(self.drink_what, function_key):
-                        self.logger.debug(f"进入到了功能函数：喝什么")
-                        handler = self.function_dict.get("喝什么")
-                        handler(msg=msg)
-
+                else:
+                    self.logger.debug(f"进入到了功能函数：chatgpt")
+                    handler = self.function_dict.get("**@@chatgpt@@**")
+                    handler(msg=msg)
                 return
 
-            if msg.is_at(self.wxid):  # 被@
-                handler = self.function_dict.get("**@@chatgpt@@**")
-                handler(msg=msg)
+            # if msg.is_at(self.wxid):  # 被@
+            #     handler = self.function_dict.get("**@@chatgpt@@**")
+            #     handler(msg=msg)
 
             else:  # 其他消息
                 pass

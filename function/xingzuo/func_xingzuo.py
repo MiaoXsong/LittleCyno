@@ -1,4 +1,5 @@
 import asyncio
+import re
 from typing import Literal, Callable
 
 from wcferry import WxMsg
@@ -35,7 +36,10 @@ def xingZuo(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> 
     :param msg: 微信消息结构
     :return: None
     """
-    xz_name = str(msg.content).split(robot_name)[-1]
+    if str(msg.content).strip().startswith(robot_name): # 如果消息以配置文件自定义的机器人名称开头
+        xz_name = str(msg.content).split(robot_name)[-1]
+    else:
+        xz_name = re.sub(r"@.*?[\u2005|\s]", "", msg.content).replace(" ", "")
     asyncio.run(xing_zuo(send_txt_msg=func_send_text_msg,
                          user_id=msg.sender,
                          group_id=msg.roomid,
