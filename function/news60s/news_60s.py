@@ -22,7 +22,7 @@ async def send_60s_img(send_img_msg: Callable[[str, str], None],
                        send_text_msg: Callable[[str, str, str], None], groups: List) -> None:
     timestamp = time.time()
     img_name = f'{timestamp}.png'
-    image_url = 'https://api.qqsuu.cn/api/dm-60s'
+    image_url = 'https://api.03c3.cn/zb/'
     logger.debug("正在获取图片")
     img = await aiorequests.get_img(image_url)
     img_tmp_path = tmp_path / img_name
