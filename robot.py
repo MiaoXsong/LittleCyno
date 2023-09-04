@@ -21,6 +21,7 @@ class Robot(Job):
     def __init__(self, config: Config, wcf: Wcf) -> None:
         self.eat_what = ''
         self.drink_what = ''
+        self.chat_gpt = False
 
         self.logger = robot_logger
         self.function_dict = {}
@@ -123,6 +124,7 @@ class Robot(Job):
                 func_send_img_msg=self.wcf.send_image)
         """Chat_GPT"""
         if str(chat_gpt).lower() == 'on':
+            self.chat_gpt = True
             self.logger.info(f"正在加载chatgpt功能")
             from function import chatgpt
             self.function_dict["查看上下文"] = partial(
@@ -174,7 +176,7 @@ class Robot(Job):
                     self.logger.debug(f"进入到了功能函数：{function_key}")
                     handler = self.function_dict.get(function_key)
                     handler(msg=msg)
-                else:
+                elif self.chat_gpt:
                     self.logger.debug(f"进入到了功能函数：chatgpt")
                     handler = self.function_dict.get("**@@chatgpt@@**")
                     handler(msg=msg)
