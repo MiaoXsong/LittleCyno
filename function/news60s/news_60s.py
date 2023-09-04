@@ -2,6 +2,10 @@ import asyncio
 import time
 from typing import Callable, List
 from datetime import datetime
+
+import aiohttp
+import aiofiles
+
 from function.yuanshen.utils.requests import aiorequests
 from pathlib import Path
 import os
@@ -18,16 +22,34 @@ if not os.path.exists(tmp_path):
     os.makedirs(tmp_path)
 
 
+async def fetch_image(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                return await response.read()
+            else:
+                raise Exception(f"Failed to fetch image. Status code: {response.status}")
+
+
+async def save_image(img_bytes, file_path):
+    async with aiofiles.open(file_path, mode='wb') as file:
+        await file.write(img_bytes)
+
+
 async def send_60s_img(send_img_msg: Callable[[str, str], None],
                        send_text_msg: Callable[[str, str, str], None], groups: List) -> None:
     timestamp = time.time()
     img_name = f'{timestamp}.png'
     image_url = 'https://api.03c3.cn/zb/'
-    logger.debug("正在获取图片")
-    img = await aiorequests.get_img(image_url)
     img_tmp_path = tmp_path / img_name
-    logger.debug("正在保存图片")
-    img.save(img_tmp_path)
+
+    try:
+        logger.debug("正在获取图片")
+        img_bytes = await fetch_image(image_url)
+        logger.debug("正在保存图片")
+        await save_image(img_bytes, img_tmp_path)
+    except Exception as e:
+        logger.error(f"Error: {e}")
 
     logger.info("正在发送到所监控的群内")
     now = datetime.now()
