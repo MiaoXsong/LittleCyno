@@ -99,7 +99,8 @@ class Robot(Job):
                 yuanshen.offCoin, func_send_text_msg=self.sendTextMsg
             )
             # 每天xx:xx执行米游币获取（配置文件中定时间点）
-            self.onEveryTime(self.config.MYBTIME, yuanshen.bbsAutoCoin, func_send_text_msg=self.sendTextMsg)
+            self.onEveryTime(self.config.MYBTIME, yuanshen.bbsAutoCoin,
+                             func_send_text_msg=self.sendTextMsg, all_contacts=self.allContacts)
         """60秒看世界"""
         if str(news_60s).lower() == 'on':
             self.logger.info(f"正在加载60秒看世界功能")

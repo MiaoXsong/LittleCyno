@@ -107,5 +107,5 @@ def mhyBbsCoin(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) 
     func_send_text_msg(send_msg, msg.roomid, msg.sender)
 
 
-def bbsAutoCoin(func_send_text_msg: Callable[[str, str, str], None]) -> None:
-    asyncio.run(bbs_auto_coin(func_send_text_msg))
+def bbsAutoCoin(func_send_text_msg: Callable[[str, str, str], None], all_contacts: dict) -> None:
+    asyncio.run(bbs_auto_coin(func_send_text_msg, all_contacts))

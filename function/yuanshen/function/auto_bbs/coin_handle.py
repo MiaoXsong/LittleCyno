@@ -14,6 +14,7 @@ from database import cache
 
 from logger.logger_object import yuanshen_logger
 from configuration import Config
+
 config = Config()
 logger = yuanshen_logger
 robot_name = config.ROBOT_NAME
@@ -360,7 +361,7 @@ async def mhy_bbs_coin(user_id: str) -> str:
     return msg if result else f'UID:{uid}{msg}'
 
 
-async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
+async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None], all_contacts: dict):
     """
     指定时间，执行所有米游币获取订阅任务， 并将结果分群绘图发送
     """
@@ -378,11 +379,12 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
     if not subs:
         logger.info(f'没有用户订阅米游币获取功能，跳过')
         return
-    logger.info(f'米游币自动获取开始执行米游币自动获取，共{len(subs)}个任务，预计花费{round(100 * len(subs) / 60, 2)}分钟')
+    logger.info(
+        f'米游币自动获取开始执行米游币自动获取，共{len(subs)}个任务，预计花费{round(100 * len(subs) / 60, 2)}分钟')
     coin_result_group = defaultdict(list)
     for sub in subs:
-        if await cache.get(f'{sub.user_id}_get_myb', ttl=180):    # 如果该用户正在手动执行中
-            continue   # 直接跳过
+        if await cache.get(f'{sub.user_id}_get_myb', ttl=180):  # 如果该用户正在手动执行中
+            continue  # 直接跳过
         await cache.set(key=f'{sub.user_id}_get_myb', value='1')  # 设置一个缓存防止用户手动执行
         result = await mhy_bbs_coin(str(sub.user_id))
         coin_result_group[sub.group_id].append({
@@ -393,24 +395,42 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None]):
         await cache.delete(f'{sub.user_id}_get_myb')  # 执行后把缓存删掉
         await asyncio.sleep(random.randint(15, 25))
 
+    async def get_user_name(uid_list):
+        uid_str = '(' + ','.join(map(str, uid_list)) + ')'
+        _select_sql = f"SELECT user_id FROM private_cookies WHERE uid in {uid_str}"
+        logger.debug(f'_select_sql = {_select_sql}')
+        return [item[0] for item in await async_db.fetch(_select_sql)]
+
     for group_id, result_list in coin_result_group.items():
+        fails = ""
         result_num = len(result_list)
         if result_fail := len([result for result in result_list if not result['result']]):
-            fails = '\n'.join(str(result['uid']) for result in result_list if not result['result'])
+            fails_list = [str(result['uid']) for result in result_list if not result['result']]
+            logger.debug(f'fails_uid_list = {fails_list}')
+            fails_user_id_list = await get_user_name(fails_list)
+            logger.debug(f'fails_user_id_list = {fails_user_id_list}')
+            for fails_user_id in fails_user_id_list:
+                fails += f"@{all_contacts.get(fails_user_id, '')}"
             msg = f'本群米游币自动获取共{result_num}个任务\n' \
                   f'其中成功{result_num - result_fail}个\n' \
-                  f'失败{result_fail}个，失败的UID列表：\n' \
+                  f'失败{result_fail}个：\n' \
                   f'{fails} \n' \
                   f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
+            # fails = '\n'.join(str(result['uid']) for result in result_list if not result['result'])
+            # msg = f'本群米游币自动获取共{result_num}个任务\n' \
+            #       f'其中成功{result_num - result_fail}个\n' \
+            #       f'失败{result_fail}个，失败的UID列表：\n' \
+            #       f'{fails} \n' \
+            #       f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
         else:
             msg = f'本群米游币自动获取共{result_num}个任务\n' \
                   f'已全部完成~'
-        if result_num <= 8:
-            result_str = ','.join(str(result["user_id"]) for result in result_list)
-            logger.debug(f"需要艾特的用户为：{result_str}")
-            send_txt_msg(msg, group_id, result_str)
-            await asyncio.sleep(random.randint(3, 6))
-            continue
+        # if result_num <= 8:
+        #     result_str = ','.join(str(result["user_id"]) for result in result_list)
+        #     logger.debug(f"需要艾特的用户为：{result_str}")
+        #     send_txt_msg(msg, group_id, result_str)
+        #     await asyncio.sleep(random.randint(3, 6))
+        #     continue
         send_txt_msg(msg, group_id, "")
         await asyncio.sleep(random.randint(3, 6))
     logger.info(f'米游币自动获取完成，共花费{round((time.time() - t) / 60, 2)}分钟')
