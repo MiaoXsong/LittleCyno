@@ -413,8 +413,7 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None], all_conta
                 fails += f"@{all_contacts.get(fails_user_id, '')}"
             msg = f'本群米游币自动获取共{result_num}个任务\n' \
                   f'其中成功{result_num - result_fail}个\n' \
-                  f'失败{result_fail}个：\n' \
-                  f'{fails} \n' \
+                  f'失败{result_fail}个：{fails} \n' \
                   f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
             # fails = '\n'.join(str(result['uid']) for result in result_list if not result['result'])
             # msg = f'本群米游币自动获取共{result_num}个任务\n' \
