@@ -64,4 +64,7 @@ async def send_60s_img(send_img_msg: Callable[[str, str], None],
     await asyncio.gather(*tasks)
 
     logger.info("发送完毕")
-    os.remove(img_tmp_path)  # 发完后删掉
+    try:
+        os.remove(img_tmp_path)  # 发完后删掉
+    except Exception as e:
+        logger.error(f"Error: {e}")
