@@ -9,10 +9,11 @@ import aiofiles
 from function.yuanshen.utils.requests import aiorequests
 from pathlib import Path
 import os
-
+from configuration import Config
 from logger.logger_object import news_60s_logger
 
 logger = news_60s_logger
+news_60s_api = Config().NEWS_60SAPI
 
 current_file_path = Path(__file__)
 current_dir_path = current_file_path.parent
@@ -40,7 +41,7 @@ async def send_60s_img(send_img_msg: Callable[[str, str], None],
                        send_text_msg: Callable[[str, str, str], None], groups: List) -> None:
     timestamp = time.time()
     img_name = f'{timestamp}.png'
-    image_url = 'https://api.03c3.cn/zb/'
+    image_url = news_60s_api
     img_tmp_path = tmp_path / img_name
 
     try:

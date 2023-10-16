@@ -32,6 +32,8 @@ chat_gpt:
   proxy: # 如果你在国内，你可能需要魔法，大概长这样：http://域名或者IP地址:端口号
   contexts: 10   # 每个微信号存储的上下文上限，超过上限滚动删除
 
+news_60s:
+  news_60s_api: "https://api.qqsuu.cn/api/dm-60s"
+  news_60s_start_time: "08:00"    # 每天60秒看世界开始时间
 
 miyoubi_start_time: "09:00"     # 每天自动获取米游币的开始时间
-news_60s_start_time: "08:00"    # 每天60秒看世界开始时间

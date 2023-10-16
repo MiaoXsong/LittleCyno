@@ -45,7 +45,8 @@ class Config(object):
         """获取米游币开始时间"""
         self.MYBTIME = yconfig["miyoubi_start_time"]
         """60秒看世界"""
-        self.NEWS_60STIME = yconfig["news_60s_start_time"]
+        self.NEWS_60STIME = yconfig["news_60s"]["news_60s_start_time"]
+        self.NEWS_60SAPI = yconfig["news_60s"]["news_60s_api"]
         """CHAT-GPT"""
         self.CHATGPT_KEY = yconfig["chat_gpt"]["key"]
         self.CHATGPT_API = yconfig["chat_gpt"]["api"]
