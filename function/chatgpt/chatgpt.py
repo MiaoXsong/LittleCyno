@@ -13,6 +13,7 @@ key = Config().CHATGPT_KEY
 api = Config().CHATGPT_API
 proxy = Config().CHATGPT_PROXY
 contexts = Config().CHATGPT_CONTEXTS
+prompt = Config().CHATGPT_PROMPT
 
 conversation_list = {}
 
@@ -85,9 +86,13 @@ async def del_contextual_content(wxid: str) -> str:
 
 
 async def updateMessage(wxid: str, question: str, role: str) -> None:
+    system_content_msg = {"role": "system", "content": prompt}
+
     # 初始化聊天记录,组装系统信息
     if wxid not in conversation_list.keys():
-        question_ = []
+        question_ = [
+            system_content_msg
+        ]
         conversation_list[wxid] = question_
 
     # 当前问题
@@ -102,8 +107,8 @@ async def updateMessage(wxid: str, question: str, role: str) -> None:
     i = len(conversation_list[wxid])
     if i > contexts:
         logger.debug('删除多余的记录')
-        # 删除多余的记录，倒着删
-        del conversation_list[wxid][0]
+        # 删除多余的记录，倒着删，且跳过第一个的系统消息
+        del conversation_list[wxid][1]
 
 
 if __name__ == "__main__":

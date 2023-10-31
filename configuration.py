@@ -52,6 +52,7 @@ class Config(object):
         self.CHATGPT_API = yconfig["chat_gpt"]["api"]
         self.CHATGPT_PROXY = yconfig["chat_gpt"]["proxy"]
         self.CHATGPT_CONTEXTS = yconfig["chat_gpt"]["contexts"]
+        self.CHATGPT_PROMPT = yconfig["chat_gpt"]["prompt"]
 
 
 

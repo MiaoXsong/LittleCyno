@@ -14,7 +14,11 @@ robot_name = Config().ROBOT_NAME
 def chatGpt(func_send_text_msg: Callable[[str, str, str], None], msg: WxMsg) -> None:
     result = True
     cache_value = asyncio.run(cache.get(f'{msg.sender}_chatgpt', ttl=300))  # 获取缓存
-    question = re.sub(r"@.*?[\u2005|\s]", "", msg.content).replace(" ", "")
+
+    if str(msg.content).strip().startswith(robot_name):  # 如果消息以配置文件自定义的机器人名称开头, 则把机器人开头名称去掉
+        question = str(msg.content).split(robot_name)[-1]
+    else:  # 否则就取@符号后面的文字
+        question = re.sub(r"@.*?[\u2005|\s]", "", msg.content).replace(" ", "")
     if cache_value:
         tips = f"你的上个问题我还没想好呢，等我先把上个问题回答了再问吧~"
         func_send_text_msg(tips, msg.roomid, msg.sender)
