@@ -409,27 +409,29 @@ async def bbs_auto_coin(send_txt_msg: Callable[[str, str, str], None], all_conta
             logger.debug(f'fails_uid_list = {fails_list}')
             fails_user_id_list = await get_user_name(fails_list)
             logger.debug(f'fails_user_id_list = {fails_user_id_list}')
-            for fails_user_id in fails_user_id_list:
-                fails += f"@{all_contacts.get(fails_user_id, '')}"
-            msg = f'本群米游币自动获取共{result_num}个任务\n' \
-                  f'其中成功{result_num - result_fail}个\n' \
-                  f'失败{result_fail}个：{fails} \n' \
-                  f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
-            # fails = '\n'.join(str(result['uid']) for result in result_list if not result['result'])
+            # for fails_user_id in fails_user_id_list:
+            #     fails += f" @{all_contacts.get(fails_user_id, '')}"
             # msg = f'本群米游币自动获取共{result_num}个任务\n' \
             #       f'其中成功{result_num - result_fail}个\n' \
-            #       f'失败{result_fail}个，失败的UID列表：\n' \
-            #       f'{fails} \n' \
+            #       f'失败{result_fail}个：{fails}\n' \
             #       f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
+            ats = ",".join(fails_user_id_list)
+            fails = '\n'.join(str(result['uid']) for result in result_list if not result['result'])
+            msg = f'本群米游币自动获取共{result_num}个任务\n' \
+                  f'其中成功{result_num - result_fail}个\n' \
+                  f'失败{result_fail}个，失败的UID列表：\n' \
+                  f'{fails} \n' \
+                  f'失败的小伙伴可以发送【{robot_name}米游币】看失败的原因'
+            send_txt_msg(msg, group_id, ats)
         else:
             msg = f'本群米游币自动获取共{result_num}个任务\n' \
                   f'已全部完成~'
+            send_txt_msg(msg, group_id, "")
         # if result_num <= 8:
         #     result_str = ','.join(str(result["user_id"]) for result in result_list)
         #     logger.debug(f"需要艾特的用户为：{result_str}")
         #     send_txt_msg(msg, group_id, result_str)
         #     await asyncio.sleep(random.randint(3, 6))
         #     continue
-        send_txt_msg(msg, group_id, "")
         await asyncio.sleep(random.randint(3, 6))
     logger.info(f'米游币自动获取完成，共花费{round((time.time() - t) / 60, 2)}分钟')
